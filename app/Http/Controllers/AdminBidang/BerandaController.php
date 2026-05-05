@@ -4,31 +4,28 @@ namespace App\Http\Controllers\AdminBidang;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\LaporanKeluhan;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+// use App\Models\LaporanKeluhan; // Nanti diaktifkan saat tabel laporan sudah siap
 
 class BerandaController extends Controller
 {
     public function indeks()
     {
+        // 1. Ambil data admin bidang yang sedang login
         $user = Auth::user();
 
-        // Mengambil statistik spesifik hanya untuk bidang admin yang sedang login
-        $statistik = [
-            // Laporan yang baru didisposisikan ke bidang ini
-            'laporan_baru' => LaporanKeluhan::where('id_bidang_tujuan', $user->id_bidang)
-                                ->where('status', 'diteruskan')->count(),
+        // 2. Ambil data bidang yang terkait dengan admin tersebut
+        $bidang = $user->bidang;
 
-            // Laporan yang sedang dikerjakan pekerja
-            'dalam_pengerjaan' => LaporanKeluhan::where('id_bidang_tujuan', $user->id_bidang)
-                                ->where('status', 'proses')->count(),
+        // 3. Keamanan Ekstra: Cegah masuk jika admin belum punya bidang
+        if (!$bidang) {
+            abort(403, 'Akses Ditolak: Akun Anda belum memiliki bidang yang ditugaskan. Hubungi Admin Universal.');
+        }
 
-            // Total pekerja UPTD yang ada di bidang ini
-            'total_pekerja' => User::where('peran', 'pekerja_bidang')
-                                ->where('id_bidang', $user->id_bidang)->count(),
-        ];
+        // Nanti statistik laporan khusus bidang ini ditaruh di sini
+        // Contoh: $laporan_masuk = LaporanKeluhan::where('id_bidang_tujuan', $user->id_bidang)->count();
 
-        return view('admin_bidang.beranda', compact('statistik'));
+        // 4. Kirim data ke tampilan
+        return view('admin_bidang.beranda.indeks', compact('user', 'bidang'));
     }
 }

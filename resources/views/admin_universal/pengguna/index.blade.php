@@ -6,21 +6,39 @@
         <h2 class="text-2xl font-bold text-gray-800">Manajemen Pengguna</h2>
         <p class="text-sm text-gray-400 font-medium">Kelola akses akun untuk admin dan pekerja lapangan</p>
     </div>
-    <button onclick="toggleModal('modalTambah')" class="bg-pupr-blue text-white px-5 py-2.5 rounded-lg font-bold shadow-md hover:bg-opacity-90 hover:shadow-lg transition flex items-center">
+    <button type="button" onclick="bukaModalTambah()" class="bg-[#1E3A8A] hover:bg-blue-800 text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center shadow-md transition">
         <i class="fas fa-user-plus mr-2"></i> Tambah Pengguna Baru
     </button>
 </div>
 
+<!-- Notifikasi Flash Message dengan SweetAlert2 -->
 @if(session('sukses'))
-    <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow-sm flex items-center">
-        <i class="fas fa-check-circle mr-3 text-lg"></i> {{ session('sukses') }}
-    </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: "{{ session('sukses') }}",
+            timer: 3000,
+            showConfirmButton: false,
+            customClass: { popup: 'rounded-2xl shadow-xl' }
+        });
+    });
+</script>
 @endif
 
 @if(session('error'))
-    <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow-sm flex items-center">
-        <i class="fas fa-exclamation-triangle mr-3 text-lg"></i> {{ session('error') }}
-    </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: "{{ session('error') }}",
+            confirmButtonColor: '#dc2626',
+            customClass: { popup: 'rounded-2xl shadow-xl' }
+        });
+    });
+</script>
 @endif
 
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -59,7 +77,7 @@
                     </span>
                 </td>
                 <td class="px-6 py-4 text-center flex justify-center space-x-3">
-                    <button type="button" onclick="bukaModalHapus('{{ route('admin_universal.pengguna.hapus', $item->id) }}', '{{ $item->nama_lengkap }}')" class="w-8 h-8 rounded bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition shadow-sm flex items-center justify-center" title="Hapus Akun">
+                    <button type="button" onclick="konfirmasiHapusPengguna('{{ route('admin_universal.pengguna.hapus', $item->id) }}', '{{ $item->nama_lengkap }}')" class="w-8 h-8 rounded bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition shadow-sm flex items-center justify-center" title="Hapus Akun">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 </td>
@@ -69,83 +87,168 @@
     </table>
 </div>
 
-<div id="modalTambah" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 transition-all">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8">
-        <div class="flex justify-between items-center mb-6 border-b pb-4">
-            <h3 class="text-xl font-bold text-gray-800">Tambah Pengguna Baru</h3>
-            <button onclick="toggleModal('modalTambah')" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+<!-- ========================================== -->
+<!-- MODAL TAMBAH PENGGUNA -->
+<!-- ========================================== -->
+<div id="modal-tambah" class="fixed inset-0 z-[100] hidden items-center justify-center">
+    <!-- Latar Belakang Gelap -->
+    <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="tutupModalTambah()"></div>
+
+    <!-- Kotak Modal (Diperbesar menjadi max-w-2xl) -->
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden transform transition-all">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+            <h3 class="text-lg font-bold text-gray-800">Tambah Pengguna Baru</h3>
+            <button onclick="tutupModalTambah()" class="text-gray-400 hover:text-red-500 transition text-xl">&times;</button>
         </div>
 
-        <form action="{{ route('admin_universal.pengguna.simpan') }}" method="POST" class="space-y-4">
+        <!-- Form Input -->
+        <form action="{{ route('admin_universal.pengguna.simpan') }}" method="POST">
             @csrf
+            <div class="p-6">
+                <!-- Tampilkan Pesan Error Global Jika Ada -->
+                @if($errors->any())
+                    <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-bold">
+                        <ul class="list-disc pl-5">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Nama Lengkap</label>
-                    <input type="text" name="nama_lengkap" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-pupr-blue" required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <!-- Nama Lengkap -->
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Nama Lengkap <span class="text-red-500">*</span></label>
+                        <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap') }}" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-pupr-blue outline-none shadow-sm" required>
+                    </div>
+
+                    <!-- Nama Pengguna (Username) -->
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Nama Pengguna (Username) <span class="text-red-500">*</span></label>
+                        <input type="text" name="username" value="{{ old('username') }}" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-pupr-blue outline-none shadow-sm" required>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Nama Pengguna</label>
-                    <input type="text" name="username" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-pupr-blue" required>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                    <!-- Email -->
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Alamat Email <span class="text-red-500">*</span></label>
+                        <input type="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-pupr-blue outline-none shadow-sm" required>
+                    </div>
+
+                    <!-- Kata Sandi dengan Ikon Mata -->
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Kata Sandi (Min. 6 Karakter) <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <input type="password" name="password" id="input-password" class="w-full border border-gray-300 rounded-lg p-3 pr-10 text-sm focus:border-pupr-blue outline-none shadow-sm" minlength="6" required>
+                            <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-pupr-blue transition focus:outline-none">
+                                <i class="fas fa-eye" id="eye-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-2">
+                    <!-- Peran -->
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Peran Sistem <span class="text-red-500">*</span></label>
+                        <select name="peran" id="pilihPeran" onchange="cekPeran()" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-pupr-blue outline-none shadow-sm font-semibold text-gray-700" required>
+                            <option value="">-- Pilih Peran --</option>
+                            <option value="admin_universal">Admin Universal</option>
+
+                            <!-- LOGIKA CERDAS: Cek apakah ada data bidang -->
+                            @if(count($bidang) > 0)
+                                <option value="admin_bidang">Admin Bidang</option>
+                                <option value="pekerja">Pekerja UPTD</option>
+                            @else
+                                <!-- Jika kosong, kunci opsinya agar tidak bisa diklik -->
+                                <option value="admin_bidang" disabled class="text-red-400">Admin Bidang (Buat Bidang Dulu!)</option>
+                                <option value="pekerja" disabled class="text-red-400">Pekerja UPTD (Buat Bidang Dulu!)</option>
+                            @endif
+                        </select>
+
+                        <!-- Pesan Peringatan Merah Jika Bidang Kosong -->
+                        @if(count($bidang) == 0)
+                            <p class="text-[10px] text-red-500 mt-1 font-bold animate-pulse">
+                                <i class="fas fa-exclamation-circle mr-1"></i> Data bidang kosong. Silakan buat di menu Kelola Bidang.
+                            </p>
+                        @endif
+                    </div>
+
+                    <!-- Pilih Bidang (Wajib untuk Bidang/Pekerja) -->
+                    <div id="wadahBidang" class="hidden">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Pilih Bidang <span class="text-red-500">*</span></label>
+                        <select name="bidang_id" id="inputBidang" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-pupr-blue outline-none shadow-sm">
+                            <option value="">-- Pilih Bidang --</option>
+                            @foreach($bidang as $item_bidang)
+                                <option value="{{ $item_bidang->id }}">{{ $item_bidang->nama_bidang }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-gray-700 mb-1">Email</label>
-                <input type="email" name="email" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-pupr-blue" required>
-            </div>
-
-            <div>
-                <label class="block text-xs font-bold text-gray-700 mb-1">Kata Sandi</label>
-                <input type="password" name="password" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-pupr-blue" required>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Peran</label>
-                    <select name="peran" id="pilihPeran" onchange="cekPeran()" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-pupr-blue">
-                        <option value="admin_universal">Admin Universal</option>
-                        <option value="admin_bidang">Admin Bidang</option>
-                        <option value="pekerja_bidang">Karyawan / Pekerja UPTD</option>
-                    </select>
-                </div>
-                <div id="wadahBidang" class="hidden">
-                    <label class="block text-xs font-bold text-gray-700 mb-1">Pilih Bidang</label>
-                    <select name="id_bidang" class="w-full border border-gray-200 rounded-lg p-2.5 text-sm outline-none focus:border-pupr-blue">
-                        <option value="">-- Pilih Bidang --</option>
-                        @foreach($bidang as $b)
-                            <option value="{{ $b->id }}">{{ $b->nama_bidang }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <div class="pt-4 flex justify-end space-x-3 border-t">
-                <button type="button" onclick="toggleModal('modalTambah')" class="px-5 py-2.5 text-gray-500 font-bold text-sm hover:bg-gray-100 rounded-lg transition">Batal</button>
-                <button type="submit" class="bg-pupr-blue text-white px-5 py-2.5 rounded-lg font-bold text-sm shadow-md hover:bg-opacity-90 transition">Simpan Pengguna</button>
+            <!-- Footer Tombol -->
+            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                <button type="button" onclick="tutupModalTambah()" class="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-bold transition shadow-sm">
+                    Batal
+                </button>
+                <button type="submit" class="px-8 py-2.5 bg-[#1E3A8A] hover:bg-blue-800 text-white rounded-lg text-sm font-bold transition shadow-md">
+                    Simpan Pengguna
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<div id="modalHapus" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center transform transition-transform scale-100">
-        <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4 text-red-500 text-3xl">
-            <i class="fas fa-exclamation-triangle"></i>
-        </div>
 
-        <h3 class="text-xl font-bold text-gray-800 mb-2">Hapus Akun?</h3>
-        <p class="text-sm text-gray-500 mb-6">Apakah Anda yakin ingin menghapus akun <span id="namaPenggunaHapus" class="font-bold text-gray-800"></span>? Tindakan ini tidak dapat dibatalkan.</p>
 
-        <form id="formHapusPengguna" method="POST" action="">
-            @csrf @method('DELETE')
-            <div class="flex justify-center space-x-3">
-                <button type="button" onclick="tutupModalHapus()" class="w-full px-5 py-3 bg-gray-100 text-gray-700 font-bold text-sm rounded-xl hover:bg-gray-200 transition">Batal</button>
-                <button type="submit" class="w-full px-5 py-3 bg-red-500 text-white font-bold text-sm rounded-xl hover:bg-red-600 transition shadow-md">Ya, Hapus</button>
-            </div>
-        </form>
-    </div>
-</div>
+<!-- SCRIPT UNTUK BUKA TUTUP DAN LIHAT PASSWORD -->
+<script>
+    // Pastikan di tombol "Tambah Pengguna" yang ada di atas tabel memanggil bukaModalTambah()
+    function bukaModalTambah() {
+        document.getElementById('modal-tambah').classList.remove('hidden');
+        document.getElementById('modal-tambah').classList.add('flex');
+    }
+    function tutupModalTambah() {
+        document.getElementById('modal-tambah').classList.add('hidden');
+        document.getElementById('modal-tambah').classList.remove('flex');
+    }
+
+    // Fungsi canggih untuk mengintip kata sandi
+    function togglePassword() {
+        const inputPwd = document.getElementById('input-password');
+        const eyeIcon = document.getElementById('eye-icon');
+
+        if (inputPwd.type === 'password') {
+            inputPwd.type = 'text';
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash'); // Ganti ikon jadi mata dicoret
+        } else {
+            inputPwd.type = 'password';
+            eyeIcon.classList.remove('fa-eye-slash');
+            eyeIcon.classList.add('fa-eye'); // Ganti ikon mata normal
+        }
+    }
+</script>
+
+<!-- SCRIPT OTOMATIS BUKA MODAL JIKA ADA ERROR VALIDASI -->
+@if($errors->any())
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Jika Laravel mendeteksi ada error input, otomatis paksa modal terbuka
+        bukaModalTambah();
+    });
+</script>
+@endif
+
+<!-- Form Rahasia untuk Hapus Pengguna (Akan dipanggil oleh SweetAlert) -->
+<form id="form-hapus-pengguna-rahasia" method="POST" action="" class="hidden">
+    @csrf
+    @method('DELETE')
+</form>
 
 <script>
     // Fungsionalitas Modal Tambah
@@ -156,24 +259,51 @@
     function cekPeran() {
         var peran = document.getElementById('pilihPeran').value;
         var wadahBidang = document.getElementById('wadahBidang');
+        var inputBidang = document.getElementById('inputBidang');
 
-        if(peran == 'admin_bidang' || peran == 'pekerja_bidang') {
+        // Jika yang dipilih adalah admin_bidang atau pekerja
+        if(peran === 'admin_bidang' || peran === 'pekerja') {
             wadahBidang.classList.remove('hidden');
+            inputBidang.setAttribute('required', 'required'); // Jadikan wajib diisi
         } else {
             wadahBidang.classList.add('hidden');
+            inputBidang.removeAttribute('required'); // Hilangkan status wajib
+            inputBidang.value = ""; // Reset isian
         }
     }
+
+    // Panggil sekali saat halaman dimuat untuk memastikan status awalnya benar
     cekPeran();
 
-    // Fungsionalitas Modal Hapus Custom
-    function bukaModalHapus(urlDelete, namaUser) {
-        document.getElementById('namaPenggunaHapus').innerText = namaUser;
-        document.getElementById('formHapusPengguna').action = urlDelete;
-        document.getElementById('modalHapus').classList.remove('hidden');
-    }
-
-    function tutupModalHapus() {
-        document.getElementById('modalHapus').classList.add('hidden');
+    // Fungsionalitas Modal Hapus dengan SweetAlert2
+    function konfirmasiHapusPengguna(urlDelete, namaUser) {
+        Swal.fire({
+            title: 'Hapus Akun?',
+            html: `Apakah Anda yakin ingin menghapus akun <b>${namaUser}</b>? Tindakan ini tidak dapat dibatalkan.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#f3f4f6',
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: '<span class="text-gray-700">Batal</span>',
+            reverseButtons: true,
+            customClass: {
+                popup: 'rounded-3xl shadow-2xl p-6 border border-gray-100',
+                title: 'text-xl font-bold text-gray-800 mb-2',
+                htmlContainer: 'text-sm text-gray-500 mb-6',
+                icon: 'text-red-500 border-red-100 bg-red-50 w-20 h-20 text-4xl mb-4',
+                confirmButton: 'w-full sm:w-auto px-8 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition shadow-md',
+                cancelButton: 'w-full sm:w-auto px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition',
+                actions: 'flex flex-col-reverse sm:flex-row gap-3 w-full justify-center'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Eksekusi form rahasia jika diklik "Ya"
+                const formHapus = document.getElementById('form-hapus-pengguna-rahasia');
+                formHapus.action = urlDelete;
+                formHapus.submit();
+            }
+        });
     }
 </script>
 @endsection

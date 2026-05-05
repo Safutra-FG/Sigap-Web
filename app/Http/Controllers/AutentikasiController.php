@@ -37,7 +37,7 @@ class AutentikasiController extends Controller
             return redirect()->intended('/');
         }
 
-        return back()->with('error', 'Username atau password salah!');
+        return back()->with('error', 'Nama Pengguna atau Kata Sandi salah!');
     }
 
     // Logout

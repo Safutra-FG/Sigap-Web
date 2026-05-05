@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 
 class PenggunaController extends Controller
 {
-    // Tampil Daftar Pengguna [cite: 156]
+    // Tampil Daftar Pengguna
     public function indeks()
     {
         // Ambil semua pengguna beserta data bidangnya
@@ -21,32 +21,44 @@ class PenggunaController extends Controller
         return view('admin_universal.pengguna.index', compact('pengguna', 'bidang'));
     }
 
-    // Simpan Pengguna Baru [cite: 156]
+    // Simpan Pengguna Baru
     public function simpan(Request $request)
     {
+        // 1. Validasi Super Ketat
         $request->validate([
-            'nama_lengkap' => 'required',
-            'username'   => 'required|unique:users,username',
-            'email'      => 'required|email|unique:users,email',
-            'password'   => 'required|min:6',
-            'peran'      => 'required',
+            'nama_lengkap' => 'required|string|max:255',
+            'username'     => 'required|string|max:50|unique:users,username',
+            'email'        => 'required|email|unique:users,email',
+            'password'     => 'required|string|min:6',
+            'peran'        => 'required|in:admin_universal,admin_bidang,pekerja',
+            'bidang_id'    => 'nullable' // Tangkap input dari form
+        ], [
+            'email.unique'   => 'Gagal: Alamat email ini sudah terdaftar pada akun lain!',
+            'username.unique'=> 'Gagal: Nama pengguna (username) ini sudah dipakai, cari yang lain!',
+            'password.min'   => 'Gagal: Kata sandi terlalu pendek. Wajib minimal 6 karakter demi keamanan.',
         ]);
 
-        $data = $request->all();
-        // Enkripsi kata sandi
-        $data['password'] = Hash::make($request->password);
+        // 2. Proses simpan ke database (PERHATIKAN BARIS id_bidang)
+        User::create([
+            'nama_lengkap' => $request->nama_lengkap,
+            'username'     => $request->username,
+            'email'        => $request->email,
+            'password'     => Hash::make($request->password),
+            'peran'        => $request->peran,
+            'id_bidang'    => $request->bidang_id, // KIRI: Nama di Database, KANAN: Nama di HTML
+        ]);
 
-        // Jika peran admin universal, kosongkan id_bidang
-        if ($request->peran == 'admin_universal') {
-            $data['id_bidang'] = null;
-        }
+        // Catat Log
+        \App\Models\LogAktivitas::create([
+            'user_id' => auth()->id(),
+            'aktivitas' => "Menambahkan pengguna baru: {$request->nama_lengkap}",
+            'kategori' => 'Akun'
+        ]);
 
-        User::create($data);
-
-        return redirect()->route('admin_universal.pengguna')->with('sukses', 'Akun pengguna berhasil ditambahkan!');
+        return redirect()->route('admin_universal.pengguna')->with('sukses', 'Pengguna baru berhasil ditambahkan!');
     }
 
-    // Hapus Pengguna [cite: 156]
+    // Hapus Pengguna
     public function hapus($id)
     {
         $user = User::findOrFail($id);
@@ -55,6 +67,14 @@ class PenggunaController extends Controller
         if (auth()->id() == $user->id) {
             return redirect()->route('admin_universal.pengguna')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri!');
         }
+
+        // (Opsional) Jika kamu ingin mencatat aktivitas penghapusan ke Log Profil
+        $nama = $user->nama_lengkap;
+        \App\Models\LogAktivitas::create([
+            'user_id' => auth()->id(),
+            'aktivitas' => "Menghapus akun pengguna: {$nama}",
+            'kategori' => 'Akun'
+        ]);
 
         $user->delete();
         return redirect()->route('admin_universal.pengguna')->with('sukses', 'Akun berhasil dihapus!');

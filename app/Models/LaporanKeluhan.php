@@ -19,6 +19,7 @@ class LaporanKeluhan extends Model
         'lokasi_gps',
         'alamat_map',
         'foto_bukti',
+        'video_bukti',
         'status',
         'id_bidang_tujuan',
         'alasan_penolakan'
