@@ -22,13 +22,15 @@ class LaporanKeluhan extends Model
         'video_bukti',
         'status',
         'id_bidang_tujuan',
-        'alasan_penolakan'
+        'catatan_disposisi',
+        'alasan_penolakan',
     ];
 
     // Relasi ke User (Masyarakat yang melapor)
     public function pelapor()
     {
-        return $this->belongsTo(User::class, 'id_pelapor');
+        // Menghubungkan id_pelapor di tabel ini dengan id di tabel User
+        return $this->belongsTo(User::class, 'id_pelapor', 'id');
     }
 
     // Relasi ke Bidang (Tujuan disposisi)

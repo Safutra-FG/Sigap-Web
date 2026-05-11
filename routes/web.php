@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminUniversal\BidangController;
 use App\Http\Controllers\AdminUniversal\PenggunaController;
 use App\Http\Controllers\AdminUniversal\LaporanController as LaporanUniversal;
 use App\Http\Controllers\AdminUniversal\StatistikController;
+use App\Http\Controllers\AdminUniversal\ProfilController;
 
 use App\Http\Controllers\AdminBidang\BerandaController as BerandaBidang;
 use App\Http\Controllers\AdminBidang\LaporanController as LaporanBidang;
@@ -66,11 +67,16 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/laporan/disposisi/{id}', [LaporanUniversal::class, 'disposisi'])->name('laporan.disposisi');
         Route::post('/laporan/tolak/{id}', [LaporanUniversal::class, 'tolak'])->name('laporan.tolak');
 
+        // ==========================================
         // Profil Admin Universal
-        Route::get('/profil', [\App\Http\Controllers\AdminUniversal\ProfilController::class, 'indeks'])->name('profil');
-        Route::get('/profil', [\App\Http\Controllers\AdminUniversal\ProfilController::class, 'indeks'])->name('profil');
-        Route::post('/profil/foto', [\App\Http\Controllers\AdminUniversal\ProfilController::class, 'updateFoto'])->name('profil.foto');
-        Route::delete('/profil/log', [\App\Http\Controllers\AdminUniversal\ProfilController::class, 'hapusLog'])->name('profil.log.hapus');
+        // ==========================================
+        Route::get('/profil', [ProfilController::class, 'indeks'])->name('profil');
+        Route::post('/profil/foto', [ProfilController::class, 'updateFoto'])->name('profil.foto');
+        Route::delete('/profil/log', [ProfilController::class, 'hapusLog'])->name('profil.log.hapus');
+
+        // 2 Rute Utama untuk fitur baru kita:
+        Route::put('/profil/update', [ProfilController::class, 'updateProfil'])->name('profil.update');
+        Route::delete('/profil/foto/hapus', [ProfilController::class, 'hapusFoto'])->name('profil.foto.hapus');
 
         // Sistem Notifikasi
         Route::get('/notifikasi/baca-semua', [\App\Http\Controllers\AdminUniversal\NotifikasiController::class, 'bacaSemua'])->name('notifikasi.baca_semua');

@@ -181,15 +181,28 @@
                             {{ \Carbon\Carbon::parse($item->created_at)->format('d M') }}<br>
                             <span class="text-xs">{{ \Carbon\Carbon::parse($item->created_at)->format('Y') }}</span>
                         </td>
+
+                        <!-- ========================================== -->
+                        <!-- LOGIKA BARU UNTUK KOLOM JENIS LAPORAN      -->
+                        <!-- ========================================== -->
                         <td class="px-6 py-5">
-                            @if(str_contains(strtolower($item->kategori_bidang), 'marga'))
-                                <span class="px-3 py-1 border border-blue-200 text-blue-600 bg-blue-50 rounded-full text-[10px] font-bold">Kerusakan Jalan</span>
-                            @elseif(str_contains(strtolower($item->kategori_bidang), 'sda'))
-                                <span class="px-3 py-1 border border-pink-200 text-pink-600 bg-pink-50 rounded-full text-[10px] font-bold">Drainase</span>
+                            @if(strtolower($item->status) === 'pending')
+                                <span class="px-3 py-1 border border-gray-200 text-gray-400 bg-gray-50 rounded-full text-[10px] font-bold italic">
+                                    <i class="fas fa-clock mr-1"></i> Belum Ditentukan
+                                </span>
                             @else
-                                <span class="px-3 py-1 border border-orange-200 text-orange-600 bg-orange-50 rounded-full text-[10px] font-bold">{{ $item->kategori_bidang }}</span>
+                                @if(str_contains(strtolower($item->kategori_bidang), 'marga'))
+                                    <span class="px-3 py-1 border border-blue-200 text-blue-600 bg-blue-50 rounded-full text-[10px] font-bold">Kerusakan Jalan</span>
+                                @elseif(str_contains(strtolower($item->kategori_bidang), 'sda'))
+                                    <span class="px-3 py-1 border border-pink-200 text-pink-600 bg-pink-50 rounded-full text-[10px] font-bold">Drainase</span>
+                                @else
+                                    <span class="px-3 py-1 border border-orange-200 text-orange-600 bg-orange-50 rounded-full text-[10px] font-bold">{{ $item->kategori_bidang }}</span>
+                                @endif
                             @endif
                         </td>
+                        <!-- ========================================== -->
+
+>>>>>>> 38c53bf (uodate)
                         <td class="px-6 py-5">
                             <div class="flex items-center space-x-3">
                                 <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-bold shrink-0">
