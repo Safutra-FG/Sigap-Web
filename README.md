@@ -1,59 +1,94 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SIGAP Web
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel 12-based complaint and task management system for public works and field operations. Project ini menangani alur pelaporan, pengelolaan bidang, tugas admin, notifikasi, dan ekspor data.
 
-## About Laravel
+## Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Autentikasi pengguna dengan peran: `admin_universal`, `admin_bidang`, dan `pekerja_bidang`
+- Dashboard pusat untuk pengelolaan bidang, pengguna, dan laporan
+- Kelola laporan keluhan dengan status, detail, disposisi/tolak, dan cetak detail PDF
+- Fitur ekspor data laporan dan bidang ke CSV/PDF/Excel
+- Sistem notifikasi internal untuk admin
+- Profil pengguna dengan update data dan foto profil
+- Pengelolaan bidang dan status aktif/non-aktif
+- Dashboard admin bidang untuk memantau laporan bidang dan menugaskan tugas kepada pekerja
+- Pengguna pekerja lapangan dapat melihat tugas dan memperbarui progres pekerjaan
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Struktur Peran
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- `admin_universal`: akses penuh ke semua data, manajemen bidang, pengguna, laporan, peta wilayah, statistik, dan notifikasi
+- `admin_bidang`: akses ke laporan bidang tertentu, detail laporan, penugasan, dan ekspor laporan bidang
+- `pekerja_bidang`: akses ke tugas lapangan untuk memperbarui progres dan menyelesaikan penugasan
 
-## Learning Laravel
+## Persyaratan
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- PHP 8.2+
+- Composer
+- Node.js & npm
+- XAMPP atau server local serupa
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Instalasi
 
-## Laravel Sponsors
+1. Clone atau salin project ke folder server lokal, misalnya `c:\xampp\htdocs\sigap_web`
+2. Jalankan:
+   - `composer install`
+   - `npm install`
+3. Salin file environment:
+   - `copy .env.example .env`
+4. Generate app key:
+   - `php artisan key:generate`
+5. Jalankan migrasi dan seeder:
+   - `php artisan migrate --force`
+   - `php artisan db:seed`
+6. Build asset produksi:
+   - `npm run build`
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Menjalankan Aplikasi
 
-### Premium Partners
+- Mode development:
+  - `npm run dev`
+- Jalankan server Laravel:
+  - `php artisan serve`
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Akun Default untuk Pengujian
 
-## Contributing
+Akun berikut tersedia di seeder:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- Admin Universal
+  - email: `admin@sigap.id`
+  - username: `admin_pusat`
+  - password: `password123`
+- Admin Bidang
+  - email: `binamarga@sigap.id`
+  - username: `admin_binamarga`
+  - password: `password123`
+- Pekerja Bidang
+  - email: `budi@sigap.id`
+  - username: `pekerja_uptd`
+  - password: `password123`
 
-## Code of Conduct
+## Rute Utama
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- `/` : halaman login
+- `admin-universal/beranda` : dashboard admin pusat
+- `admin-universal/bidang` : manajemen bidang
+- `admin-universal/pengguna` : manajemen pengguna
+- `admin-universal/laporan` : daftar laporan pusat
+- `admin-universal/statistik` : statistik sistem
+- `admin-bidang/beranda` : dashboard admin bidang
+- `admin-bidang/laporan` : daftar laporan bidang
 
-## Security Vulnerabilities
+## Dependensi Penting
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- `laravel/framework` ^12.0
+- `barryvdh/laravel-dompdf` ^3.1
+- `laravel/tinker`
+- `vite`, `tailwindcss`, `laravel-vite-plugin`
 
-## License
+## Catatan
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Project ini sudah menggunakan Laravel 12 dengan Vite untuk asset management. Pastikan database dan file storage sudah dikonfigurasi di `.env` sebelum menjalankan migrasi.
+
+---
+
+File ini sekarang merepresentasikan aplikasi SIGAP, bukan README bawaan skeleton Laravel.

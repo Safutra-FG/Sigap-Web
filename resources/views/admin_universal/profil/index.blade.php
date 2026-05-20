@@ -16,9 +16,18 @@
         <div class="lg:col-span-4 space-y-6">
 
             <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden text-center">
-                <div class="h-28 bg-[#1E3A8A]"></div>
 
+<<<<<<< HEAD
                 <div class="relative -mt-14 flex flex-col items-center">
+=======
+                <div class="h-32 bg-[#1E3A8A] relative overflow-hidden flex items-center justify-center">
+                    @if($user->foto_profil)
+                        <img src="{{ asset('storage/' . $user->foto_profil) }}" class="absolute inset-0 w-full h-full object-cover opacity-50 blur-[2px] transition-all duration-500" alt="Cover Profil">
+                    @endif
+                </div>
+
+                <div class="relative -mt-16 flex flex-col items-center z-10">
+>>>>>>> f76a223 (admin bidang)
                     <div class="relative inline-block">
                         <form action="{{ route('admin_universal.profil.foto') }}" method="POST" enctype="multipart/form-data" id="form-foto">
                             @csrf
@@ -244,21 +253,18 @@
 
 @push('js')
 <script>
-    // ==========================================
-    // FITUR BARU: VALIDASI FILE FOTO PROFIL SEBELUM UPLOAD
-    // ==========================================
+    // Validasi File Foto
     function validasiFoto(input) {
         if (input.files && input.files[0]) {
             const file = input.files[0];
-            const maxSize = 10 * 1024 * 1024; // Maksimal 10MB dalam satuan bytes
+            const maxSize = 10 * 1024 * 1024; // 10MB
 
             if (file.size > maxSize) {
-                // Tampilkan Error Pop-Up SweetAlert
                 Swal.fire({
                     title: 'Ukuran Terlalu Besar!',
                     text: 'Ukuran foto terlalu besar, gunakan foto lain (Maksimal 10MB).',
                     icon: 'error',
-                    confirmButtonColor: '#1E3A8A', // Warna biru PUPR
+                    confirmButtonColor: '#1E3A8A',
                     confirmButtonText: 'Mengerti',
                     customClass: {
                         popup: 'rounded-2xl shadow-xl border border-gray-100',
@@ -266,25 +272,20 @@
                         confirmButton: 'px-6 py-2.5 rounded-lg text-sm font-bold shadow-md'
                     }
                 });
-
-                // Reset input agar sistem tidak memproses file raksasa
                 input.value = '';
             } else {
-                // Jika lolos validasi (di bawah 10MB), otomatis kirim ke server
                 document.getElementById('form-foto').submit();
             }
         }
     }
 
-    // Fungsi Modal Log
+    // Modal Controller
     function bukaModalLog() { document.getElementById('modal-log').classList.remove('hidden'); }
     function tutupModalLog() { document.getElementById('modal-log').classList.add('hidden'); }
-
-    // Fungsi Modal Edit Profil
     function bukaModalEditProfil() { document.getElementById('modal-edit-profil').classList.remove('hidden'); }
     function tutupModalEditProfil() { document.getElementById('modal-edit-profil').classList.add('hidden'); }
 
-    // SweetAlert2 Hapus Foto Profil
+    // SweetAlert Hapus Foto
     function konfirmasiHapusFoto() {
         Swal.fire({
             title: 'Hapus Foto Profil?',
@@ -309,7 +310,7 @@
         });
     }
 
-    // SweetAlert2 Hapus Riwayat Log
+    // SweetAlert Hapus Riwayat Log
     function konfirmasiHapusSemuaLog() {
         tutupModalLog();
         Swal.fire({
@@ -337,9 +338,7 @@
         });
     }
 
-    // ==========================================
-    // NOTIFIKASI BERHASIL (Menangkap pesan dari Controller)
-    // ==========================================
+    // Notifikasi Berhasil
     @if(session('sukses'))
         document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
@@ -353,6 +352,7 @@
         });
     @endif
 
+    // Notifikasi Error
     @if(session('error'))
         document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({

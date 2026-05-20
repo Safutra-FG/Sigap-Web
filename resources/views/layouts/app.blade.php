@@ -66,24 +66,12 @@
             <a href="{{ route('admin_universal.pengguna') }}" class="flex items-center px-8 py-3.5 transition-colors duration-200 {{ request()->routeIs('admin_universal.pengguna') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 font-semibold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800 font-medium' }}">
                 <i class="fas fa-users w-6 text-center mr-3 text-lg"></i> Kelola Pengguna
             </a>
-            <a href="{{ route('admin_universal.profil') }}" class="flex items-center px-8 py-3.5 transition-colors duration-200 {{ request()->routeIs('admin_universal.profil') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 font-semibold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800 font-medium' }}">
-                <i class="fas fa-user-circle w-6 text-center mr-3 text-lg"></i> Profil Saya
-            </a>
-        </nav>
+            </nav>
 
         <div class="p-6 mt-auto">
             <a href="{{ route('admin_universal.peta') }}" class="w-full bg-pupr-yellow hover:bg-yellow-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center mb-8 active:scale-95">
                 <i class="fas fa-map-marked-alt mr-2"></i> Buka Peta Wilayah
             </a>
-            <div class="space-y-4 px-2">
-                <form id="form-keluar" action="{{ route('logout') }}" method="POST" class="hidden">
-                    @csrf
-                </form>
-
-                <button type="button" onclick="konfirmasiKeluar()" class="w-full flex items-center px-8 py-3.5 mt-auto text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 font-medium">
-                    <i class="fas fa-sign-out-alt w-6 text-center mr-3 text-lg"></i> Keluar
-                </button>
-            </div>
         </div>
     </aside>
 
@@ -135,11 +123,8 @@
                     </button>
                     <div id="menu-bantuan" class="hidden absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 origin-top-right">
                         <a href="{{ route('admin_universal.bantuan') }}#panduan-admin" class="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"><i class="fas fa-book w-5"></i> Panduan Admin</a>
-
                         <a href="{{ route('admin_universal.bantuan') }}#tim-it" class="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"><i class="fas fa-headset w-5"></i> Hubungi Tim IT</a>
-
                         <div class="border-t border-gray-100 my-1"></div>
-
                         <a href="{{ route('admin_universal.bantuan') }}#tentang-sigap" class="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"><i class="fas fa-info-circle w-5"></i> Tentang SIGAP</a>
                     </div>
                 </div>
@@ -150,59 +135,65 @@
                     </button>
                     <div id="menu-apps" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-gray-100 p-4 origin-top-right">
                         <p class="text-[10px] font-bold text-gray-400 mb-3 uppercase tracking-widest border-b border-gray-100 pb-2">Akses Cepat</p>
-
                         <div class="grid grid-cols-3 gap-2">
-
                             <a href="{{ route('admin_universal.beranda') }}" class="flex flex-col items-center justify-start p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition group text-center">
                                 <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2 group-hover:bg-blue-100 transition"><i class="fas fa-th-large text-lg"></i></div>
                                 <span class="text-[9px] font-bold text-gray-600 uppercase leading-tight">Dashboard</span>
                             </a>
-
                             <a href="{{ route('admin_universal.laporan') ?? '#' }}" class="flex flex-col items-center justify-start p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition group text-center">
                                 <div class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center mb-2 group-hover:bg-red-100 transition"><i class="fas fa-file-signature text-lg"></i></div>
                                 <span class="text-[9px] font-bold text-gray-600 uppercase leading-tight">Laporan</span>
                             </a>
-
                             <a href="{{ route('admin_universal.bidang') }}" class="flex flex-col items-center justify-start p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition group text-center">
                                 <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center mb-2 group-hover:bg-orange-100 transition"><i class="fas fa-network-wired text-lg"></i></div>
                                 <span class="text-[9px] font-bold text-gray-600 uppercase leading-tight">Bidang</span>
                             </a>
-
                             <a href="{{ route('admin_universal.pengguna') ?? '#' }}" class="flex flex-col items-center justify-start p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition group text-center">
                                 <div class="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center mb-2 group-hover:bg-green-100 transition"><i class="fas fa-users-cog text-lg"></i></div>
                                 <span class="text-[9px] font-bold text-gray-600 uppercase leading-tight">Pengguna</span>
                             </a>
-
                             <a href="{{ route('admin_universal.profil') }}" class="flex flex-col items-center justify-start p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition group text-center">
                                 <div class="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mb-2 group-hover:bg-purple-100 transition"><i class="fas fa-user-circle text-lg"></i></div>
                                 <span class="text-[9px] font-bold text-gray-600 uppercase leading-tight">Profil</span>
                             </a>
-
                             <a href="{{ route('admin_universal.peta') }}" class="flex flex-col items-center justify-start p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition group text-center">
                                 <div class="w-10 h-10 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center mb-2 group-hover:bg-yellow-100 transition"><i class="fas fa-map-marked-alt text-lg"></i></div>
                                 <span class="text-[9px] font-bold text-gray-600 uppercase leading-tight">Peta</span>
                             </a>
-
                         </div>
                     </div>
                 </div>
 
                 <div class="h-8 w-px bg-gray-200 mx-2"></div>
 
-                <div class="flex items-center space-x-3 cursor-pointer">
-                    @if(Auth::user()->foto_profil)
-                        <img src="{{ asset('storage/' . Auth::user()->foto_profil) }}" class="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-md" alt="Profil">
-                    @else
-                        <div class="w-10 h-10 rounded-full bg-pupr-blue text-white flex items-center justify-center font-bold shadow-md">
-                            {{ substr(Auth::user()->nama_lengkap ?? 'A', 0, 1) }}
-                        </div>
-                    @endif
+                <div class="relative">
+                    <div id="btn-profil" onclick="toggleHeaderMenu('menu-profil')" class="flex items-center space-x-3 cursor-pointer p-1.5 rounded-lg hover:bg-gray-50 transition">
+                        @if(Auth::user()->foto_profil)
+                            <img src="{{ asset('storage/' . Auth::user()->foto_profil) }}" class="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-md" alt="Profil">
+                        @else
+                            <div class="w-10 h-10 rounded-full bg-pupr-blue text-white flex items-center justify-center font-bold shadow-md">
+                                {{ substr(Auth::user()->nama_lengkap ?? 'A', 0, 1) }}
+                            </div>
+                        @endif
 
-                    <div class="hidden md:block text-left">
-                        <p class="text-sm font-bold text-gray-800 leading-tight">{{ Auth::user()->nama_lengkap ?? 'Admin Utama' }}</p>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{{ str_replace('_', ' ', Auth::user()->peran ?? 'Administrator') }}</p>
+                        <div class="hidden md:block text-left">
+                            <p class="text-sm font-bold text-gray-800 leading-tight">{{ Auth::user()->nama_lengkap ?? 'Admin Utama' }}</p>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{{ str_replace('_', ' ', Auth::user()->peran ?? 'Administrator') }}</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400 text-xs ml-1"></i>
+                    </div>
+
+                    <div id="menu-profil" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 origin-top-right">
+                        <a href="{{ route('admin_universal.profil') }}" class="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                            <i class="fas fa-user-circle w-5 text-center mr-1"></i> Profil Saya
+                        </a>
+                        <div class="border-t border-gray-100 my-1"></div>
+                        <button type="button" onclick="konfirmasiKeluar()" class="w-full text-left block px-4 py-2.5 text-xs font-semibold text-red-500 hover:bg-red-50 hover:text-red-600 transition">
+                            <i class="fas fa-sign-out-alt w-5 text-center mr-1"></i> Keluar
+                        </button>
                     </div>
                 </div>
+
             </div>
         </header>
 
@@ -212,10 +203,14 @@
 
     </main>
 
+    <form id="form-keluar" action="{{ route('logout') }}" method="POST" class="hidden">
+        @csrf
+    </form>
+
     <script>
         function toggleHeaderMenu(menuId) {
             // Daftar semua ID menu dropdown di header
-            const menus = ['menu-notif', 'menu-bantuan', 'menu-apps'];
+            const menus = ['menu-notif', 'menu-bantuan', 'menu-apps', 'menu-profil'];
 
             menus.forEach(id => {
                 let elemenMenu = document.getElementById(id);
@@ -232,13 +227,20 @@
         // Script untuk menutup dropdown otomatis jika pengguna mengklik area kosong di luar menu
         document.addEventListener('click', function(event) {
             if(!event.target.closest('#btn-notif') && !event.target.closest('#menu-notif')) {
-                document.getElementById('menu-notif').classList.add('hidden');
+                let menu = document.getElementById('menu-notif');
+                if(menu) menu.classList.add('hidden');
             }
             if(!event.target.closest('#btn-bantuan') && !event.target.closest('#menu-bantuan')) {
-                document.getElementById('menu-bantuan').classList.add('hidden');
+                let menu = document.getElementById('menu-bantuan');
+                if(menu) menu.classList.add('hidden');
             }
             if(!event.target.closest('#btn-apps') && !event.target.closest('#menu-apps')) {
-                document.getElementById('menu-apps').classList.add('hidden');
+                let menu = document.getElementById('menu-apps');
+                if(menu) menu.classList.add('hidden');
+            }
+            if(!event.target.closest('#btn-profil') && !event.target.closest('#menu-profil')) {
+                let menu = document.getElementById('menu-profil');
+                if(menu) menu.classList.add('hidden');
             }
         });
     </script>

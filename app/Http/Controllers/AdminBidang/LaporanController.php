@@ -35,7 +35,7 @@ class LaporanController extends Controller
 
         $sebaran_laporan = LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)
             ->whereIn('status', ['diteruskan', 'proses', 'selesai'])
-            ->get(['id_laporan', 'kategori_bidang', 'lokasi_gps', 'status']);
+            ->get(['id', 'id_laporan', 'lokasi_gps', 'status', 'kategori_bidang']);
 
         return view('admin_bidang.laporan.index', compact('laporan_masuk', 'statistik', 'sebaran_laporan'));
     }
@@ -48,13 +48,16 @@ class LaporanController extends Controller
         $user = Auth::user();
         $namaBidangAdmin = $user->bidang->nama_bidang ?? '';
 
+        // 1. Ambil data laporan khusus bidang ini
         $laporan = LaporanKeluhan::with('pelapor')
             ->where('kategori_bidang', $namaBidangAdmin)
             ->findOrFail($id);
 
-        $pekerja = User::where('peran', 'pekerja_bidang')
-                       ->where('id_bidang', $user->id_bidang)
+        // 2. PERBAIKAN UTAMA: Ambil semua Pekerja UPTD yang statusnya aktif
+        // tanpa filter id_bidang, karena mereka ditugaskan berbasis wilayah operasi
+        $pekerja = User::where('peran', 'pekerja_uptd')
                        ->where('status_akun', 'aktif')
+                       ->orderBy('kantor_wilayah', 'asc') // Urutkan biar rapi per kecamatan
                        ->get();
 
         return view('admin_bidang.laporan.detail', compact('laporan', 'pekerja'));
