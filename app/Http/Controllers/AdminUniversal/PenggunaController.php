@@ -30,7 +30,7 @@ class PenggunaController extends Controller
             'username'     => 'required|string|max:50|unique:users,username',
             'email'        => 'required|email|unique:users,email',
             'password'     => 'required|string|min:6',
-            'peran'        => 'required|in:admin_universal,admin_bidang,pekerja',
+            'peran'        => 'required|in:admin_universal,admin_bidang,pekerja_bidang',
             'bidang_id'    => 'nullable' // Tangkap input dari form
         ], [
             'email.unique'   => 'Gagal: Alamat email ini sudah terdaftar pada akun lain!',

@@ -1,6 +1,18 @@
 @extends('layouts.app')
 
 @section('konten')
+
+<style>
+    @keyframes fadeUpMasuk {
+        0% { opacity: 0; transform: translateY(15px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .animasi-baris {
+        animation: fadeUpMasuk 0.5s ease-out forwards;
+        opacity: 0;
+    }
+</style>
+
 <div class="flex justify-between items-center mb-8">
     <div>
         <h2 class="text-2xl font-bold text-gray-800">Manajemen Pengguna</h2>
@@ -11,7 +23,6 @@
     </button>
 </div>
 
-<!-- Notifikasi Flash Message dengan SweetAlert2 -->
 @if(session('sukses'))
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -47,14 +58,14 @@
             <tr>
                 <th class="px-6 py-4">Nama & Username</th>
                 <th class="px-6 py-4">Peran</th>
-                <th class="px-6 py-4">Bidang/Departemen</th>
+                <th class="px-6 py-4">Fokus Kerja (Bidang/Wilayah)</th>
                 <th class="px-6 py-4">Status</th>
                 <th class="px-6 py-4 text-center">Aksi</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 text-sm">
             @foreach($pengguna as $item)
-            <tr class="hover:bg-gray-50 transition">
+            <tr class="hover:bg-gray-50 transition animasi-baris" style="animation-delay: {{ $loop->index * 0.08 }}s;">
                 <td class="px-6 py-4">
                     <p class="font-bold text-gray-800">{{ $item->nama_lengkap }}</p>
                     <p class="text-xs text-gray-400">{{ $item->username }} | {{ $item->email }}</p>
@@ -65,12 +76,28 @@
                     @elseif($item->peran == 'admin_bidang')
                         <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-bold">ADMIN BIDANG</span>
                     @else
-                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold">KARYAWAN UPTD</span>
+                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold">PEKERJA UPTD</span>
                     @endif
                 </td>
+
                 <td class="px-6 py-4 font-medium text-gray-600">
-                    {{ $item->bidang ? $item->bidang->nama_bidang : '-' }}
+                    @if($item->peran == 'admin_bidang')
+                        <span class="flex items-center text-blue-600">
+                            <i class="fas fa-network-wired w-4 mr-1"></i>
+                            {{ !empty($item->id_bidang) && $item->bidang ? $item->bidang->nama_bidang : 'Belum Terhubung' }}
+                        </span>
+                    @elseif(in_array($item->peran, ['pekerja_bidang', 'pekerja_uptd', 'pekerja_lapangan', 'pekerja']))
+                        <span class="flex items-center text-red-600 font-semibold">
+                            <i class="fas fa-map-marker-alt w-4 mr-1"></i>
+                            {{ !empty($item->kantor_wilayah) ? $item->kantor_wilayah : 'Belum Diatur' }}
+                        </span>
+                    @else
+                        <span class="flex items-center text-gray-400">
+                            <i class="fas fa-building w-4 mr-1"></i> Pusat Utama
+                        </span>
+                    @endif
                 </td>
+
                 <td class="px-6 py-4">
                     <span class="px-3 py-1 rounded-full text-[10px] font-bold {{ $item->status_akun == 'aktif' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                         {{ strtoupper($item->status_akun) }}
@@ -87,26 +114,18 @@
     </table>
 </div>
 
-<!-- ========================================== -->
-<!-- MODAL TAMBAH PENGGUNA -->
-<!-- ========================================== -->
 <div id="modal-tambah" class="fixed inset-0 z-[100] hidden items-center justify-center">
-    <!-- Latar Belakang Gelap -->
     <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="tutupModalTambah()"></div>
 
-    <!-- Kotak Modal (Diperbesar menjadi max-w-2xl) -->
     <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden transform transition-all">
-        <!-- Header -->
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
             <h3 class="text-lg font-bold text-gray-800">Tambah Pengguna Baru</h3>
             <button onclick="tutupModalTambah()" class="text-gray-400 hover:text-red-500 transition text-xl">&times;</button>
         </div>
 
-        <!-- Form Input -->
         <form action="{{ route('admin_universal.pengguna.simpan') }}" method="POST">
             @csrf
             <div class="p-6">
-                <!-- Tampilkan Pesan Error Global Jika Ada -->
                 @if($errors->any())
                     <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-bold">
                         <ul class="list-disc pl-5">
@@ -118,13 +137,11 @@
                 @endif
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                    <!-- Nama Lengkap -->
                     <div>
                         <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Nama Lengkap <span class="text-red-500">*</span></label>
                         <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap') }}" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-pupr-blue outline-none shadow-sm" required>
                     </div>
 
-                    <!-- Nama Pengguna (Username) -->
                     <div>
                         <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Nama Pengguna (Username) <span class="text-red-500">*</span></label>
                         <input type="text" name="username" value="{{ old('username') }}" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-pupr-blue outline-none shadow-sm" required>
@@ -132,13 +149,11 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
-                    <!-- Email -->
                     <div>
                         <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Alamat Email <span class="text-red-500">*</span></label>
                         <input type="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-pupr-blue outline-none shadow-sm" required>
                     </div>
 
-                    <!-- Kata Sandi dengan Ikon Mata -->
                     <div>
                         <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Kata Sandi (Min. 6 Karakter) <span class="text-red-500">*</span></label>
                         <div class="relative">
@@ -151,46 +166,59 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-2">
-                    <!-- Peran -->
                     <div>
                         <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Peran Sistem <span class="text-red-500">*</span></label>
                         <select name="peran" id="pilihPeran" onchange="cekPeran()" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-pupr-blue outline-none shadow-sm font-semibold text-gray-700" required>
                             <option value="">-- Pilih Peran --</option>
                             <option value="admin_universal">Admin Universal</option>
 
-                            <!-- LOGIKA CERDAS: Cek apakah ada data bidang -->
                             @if(count($bidang) > 0)
                                 <option value="admin_bidang">Admin Bidang</option>
-                                <option value="pekerja">Pekerja UPTD</option>
+                                <option value="pekerja_bidang">Pekerja UPTD</option>
                             @else
-                                <!-- Jika kosong, kunci opsinya agar tidak bisa diklik -->
                                 <option value="admin_bidang" disabled class="text-red-400">Admin Bidang (Buat Bidang Dulu!)</option>
-                                <option value="pekerja" disabled class="text-red-400">Pekerja UPTD (Buat Bidang Dulu!)</option>
+                                <option value="pekerja_bidang" disabled class="text-red-400">Pekerja UPTD (Buat Bidang Dulu!)</option>
                             @endif
                         </select>
-
-                        <!-- Pesan Peringatan Merah Jika Bidang Kosong -->
-                        @if(count($bidang) == 0)
-                            <p class="text-[10px] text-red-500 mt-1 font-bold animate-pulse">
-                                <i class="fas fa-exclamation-circle mr-1"></i> Data bidang kosong. Silakan buat di menu Kelola Bidang.
-                            </p>
-                        @endif
                     </div>
 
-                    <!-- Pilih Bidang (Wajib untuk Bidang/Pekerja) -->
                     <div id="wadahBidang" class="hidden">
-                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Pilih Bidang <span class="text-red-500">*</span></label>
-                        <select name="bidang_id" id="inputBidang" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-pupr-blue outline-none shadow-sm">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Pilih Bidang (Khusus Admin Bidang) <span class="text-red-500">*</span></label>
+                        <select name="id_bidang" id="inputBidang" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-pupr-blue outline-none shadow-sm">
                             <option value="">-- Pilih Bidang --</option>
                             @foreach($bidang as $item_bidang)
                                 <option value="{{ $item_bidang->id }}">{{ $item_bidang->nama_bidang }}</option>
                             @endforeach
                         </select>
+                        @if(count($bidang) == 0)
+                            <p class="text-[10px] text-red-500 mt-1 font-bold animate-pulse"><i class="fas fa-exclamation-circle"></i> Buat bidang dulu di menu Kelola Bidang.</p>
+                        @endif
+                    </div>
+
+                    <div id="wadahWilayah" class="hidden">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mb-1.5 block">Desa / Wilayah Operasi UPTD <span class="text-red-500">*</span></label>
+                        <select name="kantor_wilayah" id="inputWilayah" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-pupr-blue outline-none shadow-sm">
+                            <option value="">-- Pilih Desa / Wilayah --</option>
+                            <optgroup label="Kecamatan Subang">
+                                <option value="Desa Soklat">Desa Soklat</option>
+                                <option value="Desa Karanganyar">Desa Karanganyar</option>
+                                <option value="Desa Cigadung">Desa Cigadung</option>
+                            </optgroup>
+                            <optgroup label="Kecamatan Cibogo">
+                                <option value="Desa Cibogo">Desa Cibogo</option>
+                                <option value="Desa Padaasih">Desa Padaasih</option>
+                                <option value="Desa Sumurbarang">Desa Sumurbarang</option>
+                            </optgroup>
+                            <optgroup label="Kecamatan Jalancagak">
+                                <option value="Desa Jalancagak">Desa Jalancagak</option>
+                                <option value="Desa Tambakmekar">Desa Tambakmekar</option>
+                                <option value="Desa Curugrendeng">Desa Curugrendeng</option>
+                            </optgroup>
+                        </select>
                     </div>
                 </div>
             </div>
 
-            <!-- Footer Tombol -->
             <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
                 <button type="button" onclick="tutupModalTambah()" class="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-bold transition shadow-sm">
                     Batal
@@ -203,11 +231,7 @@
     </div>
 </div>
 
-
-
-<!-- SCRIPT UNTUK BUKA TUTUP DAN LIHAT PASSWORD -->
 <script>
-    // Pastikan di tombol "Tambah Pengguna" yang ada di atas tabel memanggil bukaModalTambah()
     function bukaModalTambah() {
         document.getElementById('modal-tambah').classList.remove('hidden');
         document.getElementById('modal-tambah').classList.add('flex');
@@ -217,65 +241,64 @@
         document.getElementById('modal-tambah').classList.remove('flex');
     }
 
-    // Fungsi canggih untuk mengintip kata sandi
     function togglePassword() {
         const inputPwd = document.getElementById('input-password');
         const eyeIcon = document.getElementById('eye-icon');
-
         if (inputPwd.type === 'password') {
             inputPwd.type = 'text';
             eyeIcon.classList.remove('fa-eye');
-            eyeIcon.classList.add('fa-eye-slash'); // Ganti ikon jadi mata dicoret
+            eyeIcon.classList.add('fa-eye-slash');
         } else {
             inputPwd.type = 'password';
             eyeIcon.classList.remove('fa-eye-slash');
-            eyeIcon.classList.add('fa-eye'); // Ganti ikon mata normal
+            eyeIcon.classList.add('fa-eye');
         }
     }
 </script>
 
-<!-- SCRIPT OTOMATIS BUKA MODAL JIKA ADA ERROR VALIDASI -->
 @if($errors->any())
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Jika Laravel mendeteksi ada error input, otomatis paksa modal terbuka
-        bukaModalTambah();
-    });
+    document.addEventListener("DOMContentLoaded", function() { bukaModalTambah(); });
 </script>
 @endif
 
-<!-- Form Rahasia untuk Hapus Pengguna (Akan dipanggil oleh SweetAlert) -->
 <form id="form-hapus-pengguna-rahasia" method="POST" action="" class="hidden">
     @csrf
     @method('DELETE')
 </form>
 
 <script>
-    // Fungsionalitas Modal Tambah
-    function toggleModal(id) {
-        document.getElementById(id).classList.toggle('hidden');
-    }
-
     function cekPeran() {
         var peran = document.getElementById('pilihPeran').value;
         var wadahBidang = document.getElementById('wadahBidang');
         var inputBidang = document.getElementById('inputBidang');
+        var wadahWilayah = document.getElementById('wadahWilayah');
+        var inputWilayah = document.getElementById('inputWilayah');
 
-        // Jika yang dipilih adalah admin_bidang atau pekerja
-        if(peran === 'admin_bidang' || peran === 'pekerja') {
+        if(peran === 'admin_bidang') {
             wadahBidang.classList.remove('hidden');
-            inputBidang.setAttribute('required', 'required'); // Jadikan wajib diisi
+            inputBidang.setAttribute('required', 'required');
+            wadahWilayah.classList.add('hidden');
+            inputWilayah.removeAttribute('required');
+            inputWilayah.value = "";
+        } else if(peran === 'pekerja_bidang' || peran === 'pekerja') {
+            wadahWilayah.classList.remove('hidden');
+            inputWilayah.setAttribute('required', 'required');
+            wadahBidang.classList.add('hidden');
+            inputBidang.removeAttribute('required');
+            inputBidang.value = "";
         } else {
             wadahBidang.classList.add('hidden');
-            inputBidang.removeAttribute('required'); // Hilangkan status wajib
-            inputBidang.value = ""; // Reset isian
+            inputBidang.removeAttribute('required');
+            inputBidang.value = "";
+            wadahWilayah.classList.add('hidden');
+            inputWilayah.removeAttribute('required');
+            inputWilayah.value = "";
         }
     }
 
-    // Panggil sekali saat halaman dimuat untuk memastikan status awalnya benar
     cekPeran();
 
-    // Fungsionalitas Modal Hapus dengan SweetAlert2
     function konfirmasiHapusPengguna(urlDelete, namaUser) {
         Swal.fire({
             title: 'Hapus Akun?',
@@ -298,7 +321,6 @@
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                // Eksekusi form rahasia jika diklik "Ya"
                 const formHapus = document.getElementById('form-hapus-pengguna-rahasia');
                 formHapus.action = urlDelete;
                 formHapus.submit();

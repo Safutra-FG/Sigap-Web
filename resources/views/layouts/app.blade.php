@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIGAP PUPR - Admin Universal</title>
-    <!-- Tailwind CSS & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <!-- Konfigurasi Warna Khusus PUPR -->
     <script>
         tailwind.config = {
             theme: {
@@ -47,7 +45,6 @@
         $notifDropdown = $semuaNotif->take(5); // Hanya tampilkan 5 terbaru di dropdown
     @endphp
 
-    <!-- SIDEBAR -->
     <aside class="w-64 bg-white min-h-screen border-r border-gray-100 flex flex-col fixed left-0 top-0 h-full z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         <div class="p-8 flex items-center justify-center">
             <img src="{{ asset('gambar/puprsigap1.png') }}" alt="Logo PUPR" class="w-52 object-contain">
@@ -69,36 +66,18 @@
             <a href="{{ route('admin_universal.pengguna') }}" class="flex items-center px-8 py-3.5 transition-colors duration-200 {{ request()->routeIs('admin_universal.pengguna') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 font-semibold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800 font-medium' }}">
                 <i class="fas fa-users w-6 text-center mr-3 text-lg"></i> Kelola Pengguna
             </a>
-            <a href="{{ route('admin_universal.profil') }}" class="flex items-center px-8 py-3.5 transition-colors duration-200 {{ request()->routeIs('admin_universal.profil') ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600 font-semibold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800 font-medium' }}">
-                <i class="fas fa-user-circle w-6 text-center mr-3 text-lg"></i> Profil Saya
-            </a>
-        </nav>
+            </nav>
 
         <div class="p-6 mt-auto">
-            <!-- Tombol Buka Peta Wilayah -->
             <a href="{{ route('admin_universal.peta') }}" class="w-full bg-pupr-yellow hover:bg-yellow-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center mb-8 active:scale-95">
                 <i class="fas fa-map-marked-alt mr-2"></i> Buka Peta Wilayah
             </a>
-            <div class="space-y-4 px-2">
-                <!-- Form Rahasia untuk Logout -->
-                <form id="form-keluar" action="{{ route('logout') }}" method="POST" class="hidden">
-                    @csrf
-                </form>
-
-                <!-- Tombol Keluar yang Memunculkan Pop-up -->
-                <button type="button" onclick="konfirmasiKeluar()" class="w-full flex items-center px-8 py-3.5 mt-auto text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 font-medium">
-                    <i class="fas fa-sign-out-alt w-6 text-center mr-3 text-lg"></i> Keluar
-                </button>
-            </div>
         </div>
     </aside>
 
-    <!-- KONTEN UTAMA -->
     <main class="flex-1 ml-64 min-h-screen flex flex-col">
 
-        <!-- Header / Navbar Atas -->
         <header class="bg-white border-b border-gray-100 px-8 py-4 flex justify-between items-center sticky top-0 z-[1500]">
-            <!-- Pencarian -->
             <div class="relative w-96">
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                     <i class="fas fa-search"></i>
@@ -106,10 +85,8 @@
                 <input type="text" placeholder="Cari laporan atau wilayah..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-pupr-blue focus:ring-1 focus:ring-pupr-blue transition">
             </div>
 
-            <!-- Profil & Fitur Ikon Header -->
             <div class="flex items-center space-x-5 relative">
 
-                <!-- 1. Ikon Notifikasi (Bell) -->
                 <div class="relative">
                     <button id="btn-notif" onclick="toggleHeaderMenu('menu-notif')" class="text-gray-400 hover:text-pupr-blue transition relative focus:outline-none p-1">
                         <i class="far fa-bell text-xl"></i>
@@ -118,7 +95,6 @@
                         @endif
                     </button>
 
-                    <!-- Dropdown Notifikasi -->
                     <div id="menu-notif" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden transform transition-all origin-top-right">
                         <div class="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
                             <span class="text-sm font-bold text-gray-700">Notifikasi Baru</span>
@@ -126,7 +102,6 @@
                         </div>
                         <div class="max-h-64 overflow-y-auto">
                             @forelse($notifDropdown as $notif)
-                                <!-- PERBEDAAN VISUAL: Jika belum dibaca (bg-blue-50 & border biru), jika sudah dibaca (bg-white & teks abu-abu) -->
                                 <a href="{{ route('admin_universal.notifikasi.klik', $notif->id) }}" class="block px-4 py-3 border-b border-gray-50 transition border-l-4 {{ $notif->is_read ? 'bg-white border-transparent hover:bg-gray-50' : 'bg-blue-50/50 border-blue-500 hover:bg-blue-50' }}">
                                     <p class="text-xs {{ $notif->is_read ? 'text-gray-600 font-medium' : 'text-gray-900 font-bold' }} mb-0.5">{{ $notif->judul }}</p>
                                     <p class="text-[10px] {{ $notif->is_read ? 'text-gray-400' : 'text-gray-600' }}">{{ $notif->pesan }}</p>
@@ -142,102 +117,100 @@
                     </div>
                 </div>
 
-                <!-- 2. Ikon Bantuan (Question) -->
                 <div class="relative">
                     <button id="btn-bantuan" onclick="toggleHeaderMenu('menu-bantuan')" class="text-gray-400 hover:text-pupr-blue transition focus:outline-none p-1">
                         <i class="far fa-question-circle text-xl"></i>
                     </button>
-                    <!-- Dropdown Bantuan -->
                     <div id="menu-bantuan" class="hidden absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 origin-top-right">
-                        <!-- Menggunakan anchor link (#) untuk auto-scroll -->
                         <a href="{{ route('admin_universal.bantuan') }}#panduan-admin" class="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"><i class="fas fa-book w-5"></i> Panduan Admin</a>
-
                         <a href="{{ route('admin_universal.bantuan') }}#tim-it" class="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"><i class="fas fa-headset w-5"></i> Hubungi Tim IT</a>
-
                         <div class="border-t border-gray-100 my-1"></div>
-
                         <a href="{{ route('admin_universal.bantuan') }}#tentang-sigap" class="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition"><i class="fas fa-info-circle w-5"></i> Tentang SIGAP</a>
                     </div>
                 </div>
 
-                <!-- 3. Ikon Akses Cepat (Grid) -->
                 <div class="relative">
                     <button id="btn-apps" onclick="toggleHeaderMenu('menu-apps')" class="text-gray-400 hover:text-pupr-blue transition focus:outline-none p-1">
                         <i class="fas fa-th text-xl"></i>
                     </button>
-                    <!-- Dropdown Akses Cepat (Diperlebar menjadi w-80 untuk 3 Kolom) -->
                     <div id="menu-apps" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-gray-100 p-4 origin-top-right">
                         <p class="text-[10px] font-bold text-gray-400 mb-3 uppercase tracking-widest border-b border-gray-100 pb-2">Akses Cepat</p>
-
-                        <!-- Grid 3 Kolom -->
                         <div class="grid grid-cols-3 gap-2">
-
-                            <!-- 1. Dashboard -->
                             <a href="{{ route('admin_universal.beranda') }}" class="flex flex-col items-center justify-start p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition group text-center">
                                 <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2 group-hover:bg-blue-100 transition"><i class="fas fa-th-large text-lg"></i></div>
                                 <span class="text-[9px] font-bold text-gray-600 uppercase leading-tight">Dashboard</span>
                             </a>
-
-                            <!-- 2. Laporan -->
                             <a href="{{ route('admin_universal.laporan') ?? '#' }}" class="flex flex-col items-center justify-start p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition group text-center">
                                 <div class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center mb-2 group-hover:bg-red-100 transition"><i class="fas fa-file-signature text-lg"></i></div>
                                 <span class="text-[9px] font-bold text-gray-600 uppercase leading-tight">Laporan</span>
                             </a>
-
-                            <!-- 3. Bidang -->
                             <a href="{{ route('admin_universal.bidang') }}" class="flex flex-col items-center justify-start p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition group text-center">
                                 <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center mb-2 group-hover:bg-orange-100 transition"><i class="fas fa-network-wired text-lg"></i></div>
                                 <span class="text-[9px] font-bold text-gray-600 uppercase leading-tight">Bidang</span>
                             </a>
-
-                            <!-- 4. Pengguna -->
                             <a href="{{ route('admin_universal.pengguna') ?? '#' }}" class="flex flex-col items-center justify-start p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition group text-center">
                                 <div class="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center mb-2 group-hover:bg-green-100 transition"><i class="fas fa-users-cog text-lg"></i></div>
                                 <span class="text-[9px] font-bold text-gray-600 uppercase leading-tight">Pengguna</span>
                             </a>
-
-                            <!-- 5. Profil Saya -->
                             <a href="{{ route('admin_universal.profil') }}" class="flex flex-col items-center justify-start p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition group text-center">
                                 <div class="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mb-2 group-hover:bg-purple-100 transition"><i class="fas fa-user-circle text-lg"></i></div>
                                 <span class="text-[9px] font-bold text-gray-600 uppercase leading-tight">Profil</span>
                             </a>
-
-                            <!-- 6. Peta Wilayah -->
                             <a href="{{ route('admin_universal.peta') }}" class="flex flex-col items-center justify-start p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-100 transition group text-center">
                                 <div class="w-10 h-10 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center mb-2 group-hover:bg-yellow-100 transition"><i class="fas fa-map-marked-alt text-lg"></i></div>
                                 <span class="text-[9px] font-bold text-gray-600 uppercase leading-tight">Peta</span>
                             </a>
-
                         </div>
                     </div>
                 </div>
 
                 <div class="h-8 w-px bg-gray-200 mx-2"></div>
 
-                <div class="flex items-center space-x-3 cursor-pointer">
-                    <div class="w-10 h-10 rounded-full bg-pupr-blue text-white flex items-center justify-center font-bold shadow-md">
-                        {{ substr(Auth::user()->nama_lengkap ?? 'A', 0, 1) }}
+                <div class="relative">
+                    <div id="btn-profil" onclick="toggleHeaderMenu('menu-profil')" class="flex items-center space-x-3 cursor-pointer p-1.5 rounded-lg hover:bg-gray-50 transition">
+                        @if(Auth::user()->foto_profil)
+                            <img src="{{ asset('storage/' . Auth::user()->foto_profil) }}" class="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-md" alt="Profil">
+                        @else
+                            <div class="w-10 h-10 rounded-full bg-pupr-blue text-white flex items-center justify-center font-bold shadow-md">
+                                {{ substr(Auth::user()->nama_lengkap ?? 'A', 0, 1) }}
+                            </div>
+                        @endif
+
+                        <div class="hidden md:block text-left">
+                            <p class="text-sm font-bold text-gray-800 leading-tight">{{ Auth::user()->nama_lengkap ?? 'Admin Utama' }}</p>
+                            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{{ str_replace('_', ' ', Auth::user()->peran ?? 'Administrator') }}</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400 text-xs ml-1"></i>
                     </div>
-                    <div class="hidden md:block text-left">
-                        <p class="text-sm font-bold text-gray-800 leading-tight">{{ Auth::user()->nama_lengkap ?? 'Admin Utama' }}</p>
-                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{{ str_replace('_', ' ', Auth::user()->peran ?? 'Administrator') }}</p>
+
+                    <div id="menu-profil" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 origin-top-right">
+                        <a href="{{ route('admin_universal.profil') }}" class="block px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition">
+                            <i class="fas fa-user-circle w-5 text-center mr-1"></i> Profil Saya
+                        </a>
+                        <div class="border-t border-gray-100 my-1"></div>
+                        <button type="button" onclick="konfirmasiKeluar()" class="w-full text-left block px-4 py-2.5 text-xs font-semibold text-red-500 hover:bg-red-50 hover:text-red-600 transition">
+                            <i class="fas fa-sign-out-alt w-5 text-center mr-1"></i> Keluar
+                        </button>
                     </div>
                 </div>
+
             </div>
         </header>
 
-        <!-- Area Slot Konten Dinamis -->
         <div class="p-8 flex-1">
             @yield('konten')
         </div>
 
     </main>
 
-    <!-- Script Javascript untuk Menu Header -->
+    <form id="form-keluar" action="{{ route('logout') }}" method="POST" class="hidden">
+        @csrf
+    </form>
+
     <script>
         function toggleHeaderMenu(menuId) {
             // Daftar semua ID menu dropdown di header
-            const menus = ['menu-notif', 'menu-bantuan', 'menu-apps'];
+            const menus = ['menu-notif', 'menu-bantuan', 'menu-apps', 'menu-profil'];
 
             menus.forEach(id => {
                 let elemenMenu = document.getElementById(id);
@@ -254,18 +227,24 @@
         // Script untuk menutup dropdown otomatis jika pengguna mengklik area kosong di luar menu
         document.addEventListener('click', function(event) {
             if(!event.target.closest('#btn-notif') && !event.target.closest('#menu-notif')) {
-                document.getElementById('menu-notif').classList.add('hidden');
+                let menu = document.getElementById('menu-notif');
+                if(menu) menu.classList.add('hidden');
             }
             if(!event.target.closest('#btn-bantuan') && !event.target.closest('#menu-bantuan')) {
-                document.getElementById('menu-bantuan').classList.add('hidden');
+                let menu = document.getElementById('menu-bantuan');
+                if(menu) menu.classList.add('hidden');
             }
             if(!event.target.closest('#btn-apps') && !event.target.closest('#menu-apps')) {
-                document.getElementById('menu-apps').classList.add('hidden');
+                let menu = document.getElementById('menu-apps');
+                if(menu) menu.classList.add('hidden');
+            }
+            if(!event.target.closest('#btn-profil') && !event.target.closest('#menu-profil')) {
+                let menu = document.getElementById('menu-profil');
+                if(menu) menu.classList.add('hidden');
             }
         });
     </script>
 
-<!-- MODAL SEMUA NOTIFIKASI -->
 <div id="modal-notif" class="fixed inset-0 z-[2000] hidden">
     <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="tutupModalNotif()"></div>
     <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
@@ -278,13 +257,11 @@
         <div class="p-0 overflow-y-auto flex-1 divide-y divide-gray-100">
             @forelse($semuaNotif as $notif)
             <div class="flex items-start justify-between p-4 {{ $notif->is_read ? 'bg-white' : 'bg-blue-50/30' }} hover:bg-gray-50 transition">
-                <!-- 1. Tambahkan admin_universal. di link klik -->
                 <a href="{{ route('admin_universal.notifikasi.klik', $notif->id) }}" class="flex-1 pr-4">
                     <p class="text-sm {{ $notif->is_read ? 'text-gray-600 font-medium' : 'text-gray-900 font-bold' }}">{{ $notif->judul }}</p>
                     <p class="text-xs {{ $notif->is_read ? 'text-gray-500' : 'text-gray-700' }} mt-1">{{ $notif->pesan }}</p>
                     <p class="text-[10px] text-gray-400 mt-2"><i class="far fa-clock"></i> {{ $notif->created_at->translatedFormat('d M Y, H:i') }}</p>
                 </a>
-                <!-- 2. Tambahkan admin_universal. di form hapus satuan -->
                 <form action="{{ route('admin_universal.notifikasi.hapus', $notif->id) }}" method="POST">
                     @csrf
                     @method('DELETE')
@@ -299,11 +276,9 @@
         </div>
 
         <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end">
-            <!-- 3. Tambahkan admin_universal. di form hapus semua -->
-            <<form id="form-hapus-semua-notif" action="{{ route('admin_universal.notifikasi.hapus_semua') }}" method="POST">
+            <form id="form-hapus-semua-notif" action="{{ route('admin_universal.notifikasi.hapus_semua') }}" method="POST">
                 @csrf
                 @method('DELETE')
-                <!-- Ubah type="submit" menjadi type="button" dan tambahkan onclick -->
                 <button type="button" onclick="konfirmasiHapusSemuaNotif()" class="px-4 py-2 bg-white border border-gray-300 text-red-600 hover:bg-red-50 rounded-lg text-xs font-bold transition shadow-sm flex items-center">
                     <i class="fas fa-trash-alt mr-2"></i> Bersihkan Semua Notifikasi
                 </button>
@@ -320,7 +295,6 @@
     function tutupModalNotif() { document.getElementById('modal-notif').classList.add('hidden'); }
 </script>
 
-<!-- Memuat Library SweetAlert2 (Jika belum ada di app.blade.php) -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>

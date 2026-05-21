@@ -1,12 +1,26 @@
 @extends('layouts.app')
 
-<!-- CSS Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
-<!-- Custom CSS untuk Leaflet Popup agar lebih rapi -->
 <style>
     .leaflet-popup-content-wrapper { border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
     .leaflet-popup-content { margin: 12px; }
+
+    /* --- TAMBAHAN ANIMASI HALUS --- */
+    @keyframes fadeInUpElement {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .animasi-masuk {
+        animation: fadeInUpElement 0.6s ease-out forwards;
+        opacity: 0; /* Elemen sembunyi dulu sebelum animasi mulai */
+    }
+    /* Jeda berurutan untuk efek kaskade */
+    .jeda-1 { animation-delay: 0.1s; }
+    .jeda-2 { animation-delay: 0.2s; }
+    .jeda-3 { animation-delay: 0.3s; }
+    .jeda-4 { animation-delay: 0.4s; }
+    .jeda-5 { animation-delay: 0.5s; }
 </style>
 
 @section('konten')
@@ -16,10 +30,8 @@
     </div>
 </div>
 
-<!-- KARTU STATISTIK DINAMIS -->
 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-    <!-- Kartu 1: Total Laporan -->
-    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow animasi-masuk jeda-1">
         <div class="flex justify-between items-start mb-4">
             <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                 <i class="fas fa-chart-bar"></i>
@@ -46,8 +58,7 @@
         </div>
     </div>
 
-    <!-- Kartu 2: Selesai -->
-    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow animasi-masuk jeda-2">
         <div class="flex justify-between items-start mb-4">
             <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center text-green-600">
                 <i class="fas fa-check-circle"></i>
@@ -66,8 +77,7 @@
         </div>
     </div>
 
-    <!-- Kartu 3: Proses -->
-    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow animasi-masuk jeda-3">
         <div class="flex justify-between items-start mb-4">
             <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-600">
                 <i class="fas fa-sync-alt"></i>
@@ -86,8 +96,7 @@
         </div>
     </div>
 
-    <!-- Kartu 4: Ditunda / Terbaru -->
-    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow animasi-masuk jeda-4">
         <div class="flex justify-between items-start mb-4">
             <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-red-500">
                 <i class="fas fa-clipboard-list"></i>
@@ -115,8 +124,7 @@
     </div>
 </div>
 
-<!-- KONTAINER PETA -->
-<div id="peta-container" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8 relative transition-all">
+<div id="peta-container" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8 relative transition-all animasi-masuk jeda-5">
     <div class="flex justify-between items-center mb-6">
         <div>
             <h3 class="text-lg font-bold text-gray-800">Peta Sebaran Laporan</h3>
@@ -160,11 +168,9 @@
         </div>
     </div>
 
-    <!-- Area Peta Leaflet -->
     <div id="map-wrapper" class="relative w-full h-[400px] rounded-xl overflow-hidden border border-gray-200 z-0 transition-all duration-300">
         <div id="map" class="w-full h-full bg-gray-100"></div>
 
-        <!-- LEGENDA PETA DIPERBARUI -->
         <div class="absolute top-4 left-4 bg-white/95 backdrop-blur rounded-xl p-4 shadow-lg border border-white/50 z-[1000]">
             <h4 class="text-[10px] font-extrabold text-gray-500 mb-3 tracking-widest uppercase">Legenda Peta</h4>
             <div class="space-y-3">
@@ -182,7 +188,6 @@
     </div>
 </div>
 
-<!-- Script Peta dan Layar Penuh -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
     let map, layerStandar, layerSatelit, markerGroup;
@@ -229,9 +234,9 @@
 
                         // 3. Tautan URL Google Maps & Street View
                         // URL untuk membuka langsung mode Street View (Panorama)
-                        let urlStreetView = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
+                        let urlStreetView = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=$${lat},${lng}`;
                         // URL standar untuk membuka pin Google Maps biasa
-                        let urlMaps = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+                        let urlMaps = `https://www.google.com/maps/search/?api=1&query=$${lat},${lng}`;
 
                         // 4. Bind Popup dengan Tombol Aksi
                         let marker = L.marker([lat, lng], {icon: ikonCustom});
@@ -242,7 +247,6 @@
                                 <span class="bg-gray-100 text-gray-700 px-3 py-1 text-[10px] rounded-full font-bold mb-4 inline-block">STATUS: ${laporan.status.toUpperCase()}</span>
 
                                 <div class="space-y-2">
-                                    <!-- Perbaikan: Menambahkan !text-white dan style="color: white;" agar kebal dari CSS bawaan Leaflet -->
                                     <a href="${urlStreetView}" target="_blank" class="w-full bg-blue-600 hover:bg-blue-700 !text-white text-xs font-bold py-2.5 px-3 rounded-lg flex items-center justify-center transition shadow-md" style="color: white !important;">
                                         <i class="fas fa-street-view mr-2 text-sm"></i> Lihat Sekitar (Street View)
                                     </a>
