@@ -153,6 +153,24 @@
     </div>
 
 </div>
+
+// notifikasi sukses setelah penugasan
+@if(session('sukses'))
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil Dtugaskan!',
+            text: "{{ session('sukses') }}", // Akan otomatis memunculkan teks "Laporan berhasil diproses! Pekerja telah ditugaskan ke lokasi."
+            timer: 3000,
+            showConfirmButton: false,
+            customClass: { popup: 'rounded-2xl shadow-xl border border-gray-100' }
+        });
+    });
+</script>
+@endif
+
 @endsection
 
 @push('js')

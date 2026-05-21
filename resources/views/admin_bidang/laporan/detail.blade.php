@@ -3,7 +3,6 @@
 @push('css')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
-    /* Peta memiliki transisi agar mulus saat layar penuh */
     #mapDetail { border-radius: 0.75rem; z-index: 10; transition: all 0.3s ease; }
     .leaflet-popup-content-wrapper { border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
 </style>
@@ -173,15 +172,16 @@
             </div>
 
             <div class="bg-white border border-gray-100 border-t-0 rounded-b-2xl shadow-sm p-6">
-                <form action="{{ route('admin_bidang.laporan.tugaskan', $laporan->id) }}" method="POST">
+
+                <form id="form-disposisi" action="{{ route('admin_bidang.laporan.tugaskan', $laporan->id) }}" method="POST">
                     @csrf
 
                     <div class="mb-5">
                         <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Pilih Tim Pelaksana / Pegawai UPTD <span class="text-red-500">*</span></label>
-                        <select name="id_pekerja" class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-lg focus:ring-pupr-blue focus:border-pupr-blue block p-3 appearance-none shadow-sm cursor-pointer outline-none font-semibold" required {{ $laporan->status != 'diteruskan' ? 'disabled' : '' }}>
+                        <select id="id_pekerja" name="id_pekerja" class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-lg focus:ring-pupr-blue focus:border-pupr-blue block p-3 appearance-none shadow-sm cursor-pointer outline-none font-semibold" required {{ $laporan->status != 'diteruskan' ? 'disabled' : '' }}>
                             <option value="">-- Cari Tim Berdasarkan Wilayah... --</option>
                             @foreach($pekerja as $tim)
-                                <option value="{{ $tim->id }}">
+                                <option value="{{ $tim->id }}" {{ $laporan->id_pekerja == $tim->id ? 'selected' : '' }}>
                                     {{ $tim->nama_lengkap }} ({{ $tim->kantor_wilayah ?? 'Seluruh Wilayah Subang' }})
                                 </option>
                             @endforeach
@@ -195,19 +195,19 @@
                         <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Prioritas Tugas</label>
                         <div class="grid grid-cols-3 gap-2">
                             <label class="cursor-pointer relative">
-                                <input type="radio" name="prioritas" value="Tinggi" class="peer sr-only" checked>
+                                <input type="radio" name="prioritas" value="Tinggi" class="peer sr-only" {{ ($laporan->prioritas ?? 'Tinggi') == 'Tinggi' ? 'checked' : '' }} {{ $laporan->status != 'diteruskan' ? 'disabled' : '' }}>
                                 <div class="text-center px-1 py-2.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-500 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-600 transition">
                                     <i class="fas fa-exclamation mr-1"></i> Tinggi
                                 </div>
                             </label>
                             <label class="cursor-pointer relative">
-                                <input type="radio" name="prioritas" value="Sedang" class="peer sr-only">
+                                <input type="radio" name="prioritas" value="Sedang" class="peer sr-only" {{ ($laporan->prioritas ?? '') == 'Sedang' ? 'checked' : '' }} {{ $laporan->status != 'diteruskan' ? 'disabled' : '' }}>
                                 <div class="text-center px-1 py-2.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-500 peer-checked:border-yellow-500 peer-checked:bg-yellow-50 peer-checked:text-yellow-600 transition">
                                     <i class="fas fa-angle-up mr-1"></i> Sedang
                                 </div>
                             </label>
                             <label class="cursor-pointer relative">
-                                <input type="radio" name="prioritas" value="Rendah" class="peer sr-only">
+                                <input type="radio" name="prioritas" value="Rendah" class="peer sr-only" {{ ($laporan->prioritas ?? '') == 'Rendah' ? 'checked' : '' }} {{ $laporan->status != 'diteruskan' ? 'disabled' : '' }}>
                                 <div class="text-center px-1 py-2.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-500 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-600 transition">
                                     <i class="fas fa-angle-down mr-1"></i> Rendah
                                 </div>
@@ -217,32 +217,45 @@
 
                     <div class="mb-6">
                         <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-2">Instruksi Tambahan</label>
-                        <textarea name="instruksi_tambahan" rows="4" class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-lg focus:ring-pupr-blue focus:border-pupr-blue block p-3 outline-none shadow-sm resize-none text-xs font-medium" placeholder="Tulis rincian teknis pengerjaan lapangan..." {{ $laporan->status != 'diteruskan' ? 'readonly' : '' }}></textarea>
-                    </div>
-
-                    <div class="flex items-start mb-6">
-                        <div class="flex items-center h-5">
-                            <input id="kirim_notif" type="checkbox" value="" class="w-4 h-4 text-pupr-blue bg-gray-50 border-gray-300 rounded focus:ring-pupr-blue cursor-pointer" checked>
-                        </div>
-                        <label for="kirim_notif" class="ml-2 text-[10px] text-gray-600 leading-tight cursor-pointer font-semibold">
-                            Kirim notifikasi tugas secara real-time ke Aplikasi Mobile Pekerja UPTD.
-                        </label>
+                        <textarea name="instruksi_tambahan" rows="4" class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-sm rounded-lg focus:ring-pupr-blue focus:border-pupr-blue block p-3 outline-none shadow-sm resize-none text-xs font-medium" placeholder="Tulis rincian teknis pengerjaan lapangan..." {{ $laporan->status != 'diteruskan' ? 'readonly' : '' }}>{{ $laporan->instruksi_tambahan ?? '' }}</textarea>
                     </div>
 
                     @if($laporan->status == 'diteruskan')
-                        <button type="submit" class="w-full bg-pupr-yellow hover:bg-yellow-500 text-white font-extrabold text-sm py-3.5 rounded-lg shadow-sm transition transform hover:-translate-y-0.5 flex justify-center items-center mb-3">
-                            Kirim Penugasan <i class="fas fa-paper-plane ml-2"></i>
+                        <button type="button" onclick="konfirmasiDisposisi()" class="w-full bg-pupr-yellow hover:bg-yellow-500 text-white font-extrabold text-sm py-3.5 rounded-lg shadow-sm transition transform hover:-translate-y-0.5 flex justify-center items-center mb-3">
+                            Kirim Penugasan UPTD <i class="fas fa-paper-plane ml-2"></i>
                         </button>
                     @else
-                        <button type="button" disabled class="w-full bg-gray-200 text-gray-400 font-extrabold text-sm py-3.5 rounded-lg flex justify-center items-center mb-3 cursor-not-allowed">
-                            Laporan Sedang Diproses <i class="fas fa-lock ml-2"></i>
+                        <button type="button" disabled class="w-full bg-gray-100 text-gray-400 font-extrabold text-sm py-3.5 rounded-lg flex justify-center items-center mb-3 cursor-not-allowed border border-gray-200">
+                            Laporan Sedang Dikerjakan Pekerja <i class="fas fa-lock ml-2"></i>
                         </button>
                     @endif
-
-                    <button type="button" onclick="history.back()" class="w-full bg-[#313C59] hover:bg-[#1E293B] text-white font-extrabold text-sm py-3 rounded-lg transition flex justify-center items-center">
-                        Kembalikan Laporan <i class="fas fa-undo-alt ml-2"></i>
-                    </button>
                 </form>
+
+                <div class="mt-4 pt-4 border-t border-gray-100">
+
+                    @if($laporan->status == 'diteruskan')
+                        <form id="form-kembalikan-pusat" action="{{ route('admin_bidang.laporan.kembalikan', $laporan->id) ?? '#' }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="alasan_pengembalian" id="alasan_pengembalian_pusat">
+                            <button type="button" onclick="konfirmasiKembalikanPusat()" class="w-full bg-[#313C59] hover:bg-[#1E293B] text-white font-bold text-sm py-3 rounded-lg transition flex justify-center items-center shadow-sm">
+                                <i class="fas fa-reply mr-2"></i> Kembalikan ke Admin Universal
+                            </button>
+                        </form>
+                        <p class="text-[9px] text-center text-gray-400 mt-2">Gunakan jika laporan ini bukan wewenang bidang Anda.</p>
+
+                    @elseif($laporan->status == 'proses')
+                        <form id="form-batalkan-tugas" action="{{ route('admin_bidang.laporan.batal_tugas', $laporan->id) ?? '#' }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="alasan_pembatalan" id="alasan_pembatalan_tugas">
+                            <button type="button" onclick="konfirmasiBatalkanTugas()" class="w-full bg-red-50 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white font-bold text-sm py-3 rounded-lg transition flex justify-center items-center shadow-sm">
+                                <i class="fas fa-times-circle mr-2"></i> Batalkan Penugasan Pekerja
+                            </button>
+                        </form>
+                        <p class="text-[9px] text-center text-gray-400 mt-2">Menarik kembali tugas dari Pekerja UPTD.</p>
+                    @endif
+
+                </div>
+
             </div>
         </div>
 
@@ -261,108 +274,133 @@
 @endsection
 
 @push('js')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-    let mapDetail, layerStandarDetail, layerSatelitDetail;
+    // 1. FUNGSI KONFIRMASI DISPOSISI TUGAS
+    function konfirmasiDisposisi() {
+        let selectPekerja = document.getElementById('id_pekerja');
+        let nilaiPekerja = selectPekerja.value;
+        let namaPekerja = selectPekerja.options[selectPekerja.selectedIndex].text;
 
+        if(nilaiPekerja === "") {
+            Swal.fire({
+                icon: 'warning', title: 'Tunggu Dulu!', text: 'Silakan pilih Tim Pelaksana / Pegawai UPTD terlebih dahulu.',
+                confirmButtonColor: '#1E3A8A', customClass: { popup: 'rounded-2xl shadow-xl' }
+            });
+            return false;
+        }
+
+        Swal.fire({
+            title: 'Kirim Penugasan?',
+            html: `Anda akan menugaskan laporan ini kepada <br><b>${namaPekerja}</b>.`,
+            icon: 'question', showCancelButton: true, confirmButtonColor: '#eab308', cancelButtonColor: '#9ca3af',
+            confirmButtonText: 'Ya, Kirim Tugas!', cancelButtonText: 'Batal', reverseButtons: true,
+            customClass: { popup: 'rounded-2xl shadow-xl' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Memproses...', text: 'Sedang mengirim instruksi penugasan...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => { Swal.showLoading(); }});
+                document.getElementById('form-disposisi').submit();
+            }
+        });
+    }
+
+    // 2. FUNGSI KEMBALIKAN KE ADMIN UNIVERSAL (SALAH KAMAR)
+    function konfirmasiKembalikanPusat() {
+        Swal.fire({
+            title: 'Kembalikan Laporan?',
+            text: 'Tuliskan alasan mengapa laporan ini dikembalikan ke Admin Universal (Pusat):',
+            input: 'textarea',
+            inputPlaceholder: 'Contoh: Laporan ini bukan wewenang bidang SDA, mohon dialihkan...',
+            icon: 'warning', showCancelButton: true, confirmButtonColor: '#313C59', cancelButtonColor: '#9ca3af',
+            confirmButtonText: 'Ya, Kembalikan', cancelButtonText: 'Batal', reverseButtons: true,
+            customClass: { popup: 'rounded-2xl shadow-xl' },
+            inputValidator: (value) => { if (!value) return 'Alasan pengembalian wajib diisi!'; }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('alasan_pengembalian_pusat').value = result.value;
+                Swal.fire({ title: 'Memproses...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => { Swal.showLoading(); }});
+                document.getElementById('form-kembalikan-pusat').submit();
+            }
+        });
+    }
+
+    // 3. FUNGSI BATALKAN PENUGASAN PEKERJA (TARIK TUGAS)
+    function konfirmasiBatalkanTugas() {
+        Swal.fire({
+            title: 'Batalkan Penugasan?',
+            text: 'Pekerja akan menerima notifikasi bahwa tugas ini dibatalkan. Berikan alasannya:',
+            input: 'textarea',
+            inputPlaceholder: 'Contoh: Cuaca sedang ekstrem, tugas ditunda sementara...',
+            icon: 'error', showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#9ca3af',
+            confirmButtonText: 'Ya, Batalkan Tugas', cancelButtonText: 'Tutup', reverseButtons: true,
+            customClass: { popup: 'rounded-2xl shadow-xl' },
+            inputValidator: (value) => { if (!value) return 'Alasan pembatalan wajib diisi agar pekerja tahu!'; }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('alasan_pembatalan_tugas').value = result.value;
+                Swal.fire({ title: 'Memproses...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => { Swal.showLoading(); }});
+                document.getElementById('form-batalkan-tugas').submit();
+            }
+        });
+    }
+
+    // SCRIPT PETA LEAFLET
+    let mapDetail, layerStandarDetail, layerSatelitDetail;
     document.addEventListener("DOMContentLoaded", function() {
         let koorString = "{{ $laporan->lokasi_gps ?? '-6.5627, 107.7613' }}";
         let koorArr = koorString.split(',');
-        let lat = parseFloat(koorArr[0]);
-        let lng = parseFloat(koorArr[1]);
+        let lat = parseFloat(koorArr[0]); let lng = parseFloat(koorArr[1]);
 
         mapDetail = L.map('mapDetail').setView([lat, lng], 16);
         layerStandarDetail = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 20 });
         layerSatelitDetail = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
-
         layerStandarDetail.addTo(mapDetail);
 
-        let redPinIcon = L.divIcon({
-            className: 'bg-transparent',
-            html: `<div style="text-shadow: 3px 5px 6px rgba(0,0,0,0.4);" class="text-red-500 text-[50px] hover:scale-110 transition-transform"><i class="fas fa-map-marker-alt"></i></div>`,
-            iconSize: [40, 50], iconAnchor: [20, 50]
-        });
-
+        let redPinIcon = L.divIcon({ className: 'bg-transparent', html: `<div style="text-shadow: 3px 5px 6px rgba(0,0,0,0.4);" class="text-red-500 text-[50px] hover:scale-110 transition-transform"><i class="fas fa-map-marker-alt"></i></div>`, iconSize: [40, 50], iconAnchor: [20, 50] });
         L.marker([lat, lng], {icon: redPinIcon}).addTo(mapDetail);
     });
 
     function toggleLayerMenuDetail() { document.getElementById('menu-layer-detail').classList.toggle('hidden'); }
-
     function gantiLayerDetail(jenis) {
-        if(jenis === 'standar') {
-            mapDetail.removeLayer(layerSatelitDetail);
-            layerStandarDetail.addTo(mapDetail);
-        } else {
-            mapDetail.removeLayer(layerStandarDetail);
-            layerSatelitDetail.addTo(mapDetail);
-        }
+        if(jenis === 'standar') { mapDetail.removeLayer(layerSatelitDetail); layerStandarDetail.addTo(mapDetail); }
+        else { mapDetail.removeLayer(layerStandarDetail); layerSatelitDetail.addTo(mapDetail); }
         document.getElementById('menu-layer-detail').classList.add('hidden');
     }
-
     function toggleFullscreenDetail() {
         let elemenPeta = document.getElementById('mapDetail');
-        if (!document.fullscreenElement) {
-            elemenPeta.requestFullscreen().catch(err => { alert(`Gagal: ${err.message}`); });
-        } else {
-            document.exitFullscreen();
-        }
+        if (!document.fullscreenElement) { elemenPeta.requestFullscreen().catch(err => { alert(`Gagal: ${err.message}`); }); }
+        else { document.exitFullscreen(); }
     }
-
     document.addEventListener('fullscreenchange', (event) => {
-        let iconBtn = document.getElementById('icon-fs-detail');
-        let divPeta = document.getElementById('mapDetail');
-
-        if (document.fullscreenElement) {
-            iconBtn.classList.remove('fa-expand');
-            iconBtn.classList.add('fa-compress');
-            divPeta.classList.remove('h-[350px]', 'rounded-2xl');
-            divPeta.style.height = '100vh';
-        } else {
-            iconBtn.classList.remove('fa-compress');
-            iconBtn.classList.add('fa-expand');
-            divPeta.style.height = '';
-            divPeta.classList.add('h-[350px]', 'rounded-2xl');
-        }
+        let iconBtn = document.getElementById('icon-fs-detail'); let divPeta = document.getElementById('mapDetail');
+        if (document.fullscreenElement) { iconBtn.classList.replace('fa-expand', 'fa-compress'); divPeta.classList.remove('h-[350px]', 'rounded-2xl'); divPeta.style.height = '100vh'; }
+        else { iconBtn.classList.replace('fa-compress', 'fa-expand'); divPeta.style.height = ''; divPeta.classList.add('h-[350px]', 'rounded-2xl'); }
         setTimeout(() => { mapDetail.invalidateSize(); }, 300);
     });
-
     document.addEventListener('click', function(event) {
         if(!event.target.closest('#btn-layer-detail') && !event.target.closest('#menu-layer-detail')) {
-            let menu = document.getElementById('menu-layer-detail');
-            if(menu) menu.classList.add('hidden');
+            let menu = document.getElementById('menu-layer-detail'); if(menu) menu.classList.add('hidden');
         }
     });
 
     function salinKoordinat() {
         let koordinat = document.getElementById('teks-koordinat').innerText;
         navigator.clipboard.writeText(koordinat).then(() => {
-            let iconSalin = document.getElementById('icon-salin');
-            let tombolSalin = iconSalin.parentElement;
-            iconSalin.className = 'fas fa-check text-green-600';
-            tombolSalin.classList.add('bg-green-50', 'border-green-200');
-            setTimeout(() => {
-                iconSalin.className = 'far fa-copy text-gray-500';
-                tombolSalin.classList.remove('bg-green-50', 'border-green-200');
-            }, 2000);
+            let iconSalin = document.getElementById('icon-salin'); let tombolSalin = iconSalin.parentElement;
+            iconSalin.className = 'fas fa-check text-green-600'; tombolSalin.classList.add('bg-green-50', 'border-green-200');
+            setTimeout(() => { iconSalin.className = 'far fa-copy text-gray-500'; tombolSalin.classList.remove('bg-green-50', 'border-green-200'); }, 2000);
         });
     }
 
     function openLightbox(mediaUrl, type) {
-        const modal = document.getElementById('lightboxModal');
-        const img = document.getElementById('lightboxImage');
+        const modal = document.getElementById('lightboxModal'); const img = document.getElementById('lightboxImage');
         modal.classList.remove('hidden');
-        if(type === 'image') {
-            img.src = mediaUrl;
-            img.classList.remove('hidden');
-            setTimeout(() => { img.classList.remove('scale-95'); img.classList.add('scale-100'); }, 10);
-        }
+        if(type === 'image') { img.src = mediaUrl; img.classList.remove('hidden'); setTimeout(() => { img.classList.remove('scale-95'); img.classList.add('scale-100'); }, 10); }
     }
-
     function closeLightbox() {
-        const modal = document.getElementById('lightboxModal');
-        const img = document.getElementById('lightboxImage');
-        modal.classList.add('hidden');
-        img.className = 'hidden max-w-full max-h-[85vh] rounded-lg transform scale-95 transition-transform duration-300';
+        const modal = document.getElementById('lightboxModal'); const img = document.getElementById('lightboxImage');
+        modal.classList.add('hidden'); img.className = 'hidden max-w-full max-h-[85vh] rounded-lg transform scale-95 transition-transform duration-300';
         setTimeout(() => { img.src = ""; }, 300);
     }
 </script>

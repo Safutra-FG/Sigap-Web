@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\LaporanKeluhan;
 use App\Models\Bidang;
 use Illuminate\Http\Request;
+use App\Models\SistemLog;
+use Illuminate\Support\Facades\Auth;
 
 class LaporanController extends Controller
 {
@@ -50,10 +52,31 @@ class LaporanController extends Controller
                                          ->select('id_laporan', 'lokasi_gps', 'status', 'kategori_bidang')
                                          ->get();
 
-        // 6. Ambil daftar bidang unik yang ada di database untuk menu dropdown
+        // Ambil daftar bidang unik yang ada di database untuk menu dropdown
         $daftar_bidang = LaporanKeluhan::select('kategori_bidang')->distinct()->pluck('kategori_bidang');
 
-        return view('admin_universal.laporan.index', compact('semua_laporan', 'statistik', 'sebaran_laporan', 'daftar_bidang'));
+        // 2. MENGAMBIL DATA LOG (AKTIVITAS) UNTUK TAMPILAN:
+        // Ambil 5 aktivitas terbaru yang kategorinya 'laporan' untuk daftar di pinggir peta
+        $aktivitas_terbaru = SistemLog::where('kategori', 'laporan')->latest()->take(5)->get();
+
+        // Ambil SEMUA aktivitas yang kategorinya 'laporan' untuk ditampilkan di dalam pop-up modal
+        $semua_aktivitas = SistemLog::where('kategori', 'laporan')->latest()->get();
+
+        // Kirim semua variabel ke tampilan (view) index.blade.php
+        return view('admin_universal.laporan.index', compact(
+            'statistik', 'semua_laporan', 'sebaran_laporan', 'daftar_bidang',
+            'aktivitas_terbaru', 'semua_aktivitas' // Pastikan 2 variabel ini masuk ke compact
+        ));
+
+    }
+
+    public function hapusSemuaLog()
+    {
+        // Perintah ke database: Cari semua data di tabel sistem_log yang kategorinya 'laporan', lalu HAPUS
+        SistemLog::where('kategori', 'laporan')->delete();
+
+        // Setelah berhasil dihapus, kembalikan user ke halaman sebelumnya dan kirimkan notifikasi sukses
+        return back()->with('sukses', 'Seluruh riwayat aktivitas laporan berhasil dikosongkan!');
     }
 
     // Menampilkan detail spesifik satu laporan
@@ -208,10 +231,26 @@ class LaporanController extends Controller
 
         $laporan->save();
 
-        \App\Models\LogAktivitas::create([
-            'user_id' => auth()->id(),
-            'aktivitas' => "Memperbarui status laporan #{$id} menjadi " . $request->status,
-            'kategori' => 'Laporan'
+        // 1. Catat ke dalam Log Aktivitas
+        $statusBaru = $request->status;
+        $teksAktivitas = '';
+
+        // 2. Buat teks dinamis berdasarkan aksi yang dilakukan admin
+        if ($statusBaru == 'diteruskan') {
+            $teksAktivitas = 'Mendisposisikan laporan ' . $laporan->id_laporan . ' ke Bidang ' . $request->bidang_tujuan;
+        } elseif ($statusBaru == 'ditolak') {
+            $teksAktivitas = 'Menolak laporan ' . $laporan->id_laporan;
+        } elseif ($statusBaru == 'selesai') {
+            $teksAktivitas = 'Menyelesaikan laporan ' . $laporan->id_laporan;
+        } else {
+            $teksAktivitas = 'Mengubah status laporan ' . $laporan->id_laporan;
+        }
+
+        // 3. Simpan ke database sistem_logs
+        SistemLog::create([
+            'aktivitas' => $teksAktivitas,
+            'kategori'  => 'laporan', // Harus 'laporan' agar muncul di halaman Kelola Laporan
+            'user_id'   => Auth::id() // Mencatat siapa admin yang melakukan aksi ini
         ]);
 
         return redirect()->back()->with('sukses', 'Status laporan berhasil diperbarui!');

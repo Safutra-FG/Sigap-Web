@@ -26,33 +26,35 @@ class PenggunaController extends Controller
     {
         // 1. Validasi Super Ketat
         $request->validate([
-            'nama_lengkap' => 'required|string|max:255',
-            'username'     => 'required|string|max:50|unique:users,username',
-            'email'        => 'required|email|unique:users,email',
-            'password'     => 'required|string|min:6',
-            'peran'        => 'required|in:admin_universal,admin_bidang,pekerja_bidang',
-            'bidang_id'    => 'nullable' // Tangkap input dari form
+            'nama_lengkap'   => 'required|string|max:255',
+            'username'       => 'required|string|max:50|unique:users,username',
+            'email'          => 'required|email|unique:users,email',
+            'password'       => 'required|string|min:6',
+            'peran'          => 'required|in:admin_universal,admin_bidang,pekerja_bidang',
+            'id_bidang'      => 'nullable',
+            'kantor_wilayah' => 'nullable|string', // PERBAIKAN 1: Format validasi diperbaiki
         ], [
             'email.unique'   => 'Gagal: Alamat email ini sudah terdaftar pada akun lain!',
             'username.unique'=> 'Gagal: Nama pengguna (username) ini sudah dipakai, cari yang lain!',
             'password.min'   => 'Gagal: Kata sandi terlalu pendek. Wajib minimal 6 karakter demi keamanan.',
         ]);
 
-        // 2. Proses simpan ke database (PERHATIKAN BARIS id_bidang)
+        // 2. Proses simpan ke database
         User::create([
-            'nama_lengkap' => $request->nama_lengkap,
-            'username'     => $request->username,
-            'email'        => $request->email,
-            'password'     => Hash::make($request->password),
-            'peran'        => $request->peran,
-            'id_bidang'    => $request->bidang_id, // KIRI: Nama di Database, KANAN: Nama di HTML
+            'nama_lengkap'   => $request->nama_lengkap,
+            'username'       => $request->username,
+            'email'          => $request->email,
+            'password'       => Hash::make($request->password),
+            'peran'          => $request->peran,
+            'id_bidang'      => $request->id_bidang, // PERBAIKAN 2: Menyamakan nama dengan name="id_bidang" di HTML
+            'kantor_wilayah' => $request->kantor_wilayah, // PERBAIKAN 3: Baris ini ditambahkan agar wilayah tersimpan!
         ]);
 
         // Catat Log
         \App\Models\LogAktivitas::create([
-            'user_id' => auth()->id(),
+            'user_id'   => auth()->id(),
             'aktivitas' => "Menambahkan pengguna baru: {$request->nama_lengkap}",
-            'kategori' => 'Akun'
+            'kategori'  => 'Akun'
         ]);
 
         return redirect()->route('admin_universal.pengguna')->with('sukses', 'Pengguna baru berhasil ditambahkan!');
@@ -71,9 +73,9 @@ class PenggunaController extends Controller
         // (Opsional) Jika kamu ingin mencatat aktivitas penghapusan ke Log Profil
         $nama = $user->nama_lengkap;
         \App\Models\LogAktivitas::create([
-            'user_id' => auth()->id(),
+            'user_id'   => auth()->id(),
             'aktivitas' => "Menghapus akun pengguna: {$nama}",
-            'kategori' => 'Akun'
+            'kategori'  => 'Akun'
         ]);
 
         $user->delete();
