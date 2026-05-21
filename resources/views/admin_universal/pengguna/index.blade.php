@@ -123,7 +123,7 @@
             <button onclick="tutupModalTambah()" class="text-gray-400 hover:text-red-500 transition text-xl">&times;</button>
         </div>
 
-        <form action="{{ route('admin_universal.pengguna.simpan') }}" method="POST">
+        <form id="form-tambah-pengguna" action="{{ route('admin_universal.pengguna.simpan') }}" method="POST">
             @csrf
             <div class="p-6">
                 @if($errors->any())
@@ -223,8 +223,9 @@
                 <button type="button" onclick="tutupModalTambah()" class="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-bold transition shadow-sm">
                     Batal
                 </button>
-                <button type="submit" class="px-8 py-2.5 bg-[#1E3A8A] hover:bg-blue-800 text-white rounded-lg text-sm font-bold transition shadow-md">
-                    Simpan Pengguna
+                <button type="submit" id="btn-simpan-pengguna" class="px-8 py-2.5 bg-[#1E3A8A] hover:bg-blue-800 text-white rounded-lg text-sm font-bold transition shadow-md flex items-center justify-center">
+                    <i class="fas fa-circle-notch fa-spin hidden mr-2" id="spinner-simpan"></i>
+                    <span id="teks-simpan">Simpan Pengguna</span>
                 </button>
             </div>
         </form>
@@ -232,6 +233,21 @@
 </div>
 
 <script>
+    // Fungsi untuk mengubah status tombol saat disubmit
+    document.getElementById('form-tambah-pengguna').addEventListener('submit', function() {
+        let btn = document.getElementById('btn-simpan-pengguna');
+        let spinner = document.getElementById('spinner-simpan');
+        let teks = document.getElementById('teks-simpan');
+
+        // Blokir tombol agar tidak bisa diklik 2x
+        btn.disabled = true;
+        btn.classList.add('opacity-75', 'cursor-not-allowed');
+
+        // Tampilkan animasi loading dan ubah teks
+        spinner.classList.remove('hidden');
+        teks.innerText = 'Menyimpan...';
+    });
+
     function bukaModalTambah() {
         document.getElementById('modal-tambah').classList.remove('hidden');
         document.getElementById('modal-tambah').classList.add('flex');

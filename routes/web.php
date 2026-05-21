@@ -53,6 +53,11 @@ Route::middleware(['auth'])->group(function () {
         // Kelola Laporan
         Route::get('/laporan', [LaporanUniversal::class, 'indeks'])->name('laporan');
         Route::post('/laporan/simpan-manual', [LaporanUniversal::class, 'simpan'])->name('laporan.simpan');
+        Route::delete('/admin-universal/laporan/log/hapus', [App\Http\Controllers\AdminUniversal\LaporanController::class, 'hapusSemuaLog'])->name('admin_universal.laporan.log.hapus');
+
+        // Rute untuk menghapus riwayat aktivitas laporan
+        // Menggunakan method DELETE karena ini adalah aksi menghapus data dari database
+        Route::delete('/admin-universal/laporan/log/hapus', [LaporanController::class, 'hapusSemuaLog'])->name('admin_universal.laporan.log.hapus');
 
         // Detail Laporan & Aksi Status
         Route::get('/laporan/detail/{id}', [LaporanUniversal::class, 'detail'])->name('laporan.detail');
@@ -100,6 +105,15 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/laporan/ekspor-excel', [LaporanBidangController::class, 'eksporExcel'])->name('laporan.ekspor_excel');
         Route::get('/laporan/ekspor-pdf', [LaporanBidangController::class, 'eksporPdf'])->name('laporan.ekspor_pdf');
+
+        // Rute untuk menghapus semua riwayat aktivitas (log) Admin Bidang
+        Route::delete('/laporan/log/hapus', [App\Http\Controllers\AdminBidang\LaporanController::class, 'hapusSemuaLog'])->name('laporan.log.hapus');
+
+        // Rute untuk mengembalikan laporan dari Admin Bidang ke Admin Universal (Pusat)
+        Route::post('/laporan/{id}/kembalikan', [App\Http\Controllers\AdminBidang\LaporanController::class, 'kembalikanPusat'])->name('laporan.kembalikan');
+
+        // Rute untuk menarik/membatalkan penugasan dari Pekerja UPTD
+        Route::post('/laporan/{id}/batal-tugas', [App\Http\Controllers\AdminBidang\LaporanController::class, 'batalkanTugas'])->name('laporan.batal_tugas');
     });
 
 

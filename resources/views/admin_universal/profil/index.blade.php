@@ -16,10 +16,6 @@
         <div class="lg:col-span-4 space-y-6">
 
             <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden text-center">
-
-<<<<<<< HEAD
-                <div class="relative -mt-14 flex flex-col items-center">
-=======
                 <div class="h-32 bg-[#1E3A8A] relative overflow-hidden flex items-center justify-center">
                     @if($user->foto_profil)
                         <img src="{{ asset('storage/' . $user->foto_profil) }}" class="absolute inset-0 w-full h-full object-cover opacity-50 blur-[2px] transition-all duration-500" alt="Cover Profil">
@@ -27,7 +23,6 @@
                 </div>
 
                 <div class="relative -mt-16 flex flex-col items-center z-10">
->>>>>>> f76a223 (admin bidang)
                     <div class="relative inline-block">
                         <form action="{{ route('admin_universal.profil.foto') }}" method="POST" enctype="multipart/form-data" id="form-foto">
                             @csrf

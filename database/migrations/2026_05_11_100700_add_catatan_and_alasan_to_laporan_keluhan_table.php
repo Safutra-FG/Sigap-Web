@@ -9,10 +9,15 @@ return new class extends Migration
     public function up()
     {
         Schema::table('laporan_keluhan', function (Blueprint $table) {
-            // Menambahkan kolom catatan_disposisi dan alasan_penolakan
-            // Tipe text digunakan karena isinya bisa berupa kalimat panjang
-            $table->text('catatan_disposisi')->nullable()->after('status');
-            $table->text('alasan_penolakan')->nullable()->after('catatan_disposisi');
+            // Cek apakah kolom catatan_disposisi SUDAH ADA atau BELUM
+            if (!Schema::hasColumn('laporan_keluhan', 'catatan_disposisi')) {
+                $table->text('catatan_disposisi')->nullable()->after('status');
+            }
+
+            // Asumsi ada kolom alasan_penolakan juga di file ini, lakukan pengecekan yang sama
+            if (!Schema::hasColumn('laporan_keluhan', 'alasan_penolakan')) {
+                $table->text('alasan_penolakan')->nullable()->after('status');
+            }
         });
     }
 

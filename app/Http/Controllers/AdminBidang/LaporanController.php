@@ -7,8 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\LaporanKeluhan;
 use App\Models\User;
 use App\Models\PenugasanPekerja;
+use App\Models\SistemLog; // WAJIB ADA UNTUK MENCATAT AKTIVITAS
 use Illuminate\Support\Facades\Auth;
-use Barryvdh\DomPDF\Facade\Pdf; // Wajib ditambahkan untuk fitur PDF
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LaporanController extends Controller
 {
@@ -37,7 +38,12 @@ class LaporanController extends Controller
             ->whereIn('status', ['diteruskan', 'proses', 'selesai'])
             ->get(['id', 'id_laporan', 'lokasi_gps', 'status', 'kategori_bidang']);
 
-        return view('admin_bidang.laporan.index', compact('laporan_masuk', 'statistik', 'sebaran_laporan'));
+        // AMBIL DATA AKTIVITAS UNTUK DITAMPILKAN DI SIDEBAR PETA
+        $aktivitas_terbaru = SistemLog::where('kategori', 'laporan_bidang')->latest()->take(5)->get();
+        // AMBIL SEMUA DATA AKTIVITAS UNTUK DI POP-UP
+        $semua_aktivitas = SistemLog::where('kategori', 'laporan_bidang')->latest()->get();
+
+        return view('admin_bidang.laporan.index', compact('laporan_masuk', 'statistik', 'sebaran_laporan', 'aktivitas_terbaru', 'semua_aktivitas'));
     }
 
     /**
@@ -48,19 +54,24 @@ class LaporanController extends Controller
         $user = Auth::user();
         $namaBidangAdmin = $user->bidang->nama_bidang ?? '';
 
-        // 1. Ambil data laporan khusus bidang ini
         $laporan = LaporanKeluhan::with('pelapor')
             ->where('kategori_bidang', $namaBidangAdmin)
             ->findOrFail($id);
 
-        // 2. PERBAIKAN UTAMA: Ambil semua Pekerja UPTD yang statusnya aktif
-        // tanpa filter id_bidang, karena mereka ditugaskan berbasis wilayah operasi
-        $pekerja = User::where('peran', 'pekerja_uptd')
-                       ->where('status_akun', 'aktif')
-                       ->orderBy('kantor_wilayah', 'asc') // Urutkan biar rapi per kecamatan
-                       ->get();
+        $pekerja = \App\Models\User::whereIn('peran', ['pekerja_bidang', 'pekerja_uptd', 'pekerja', 'pekerja_lapangan'])
+                        ->where('status_akun', 'aktif')
+                        ->get();
 
         return view('admin_bidang.laporan.detail', compact('laporan', 'pekerja'));
+    }
+
+    /**
+     * FUNGSI BARU 1: Hapus Semua Log Aktivitas (Admin Bidang)
+     */
+    public function hapusSemuaLog()
+    {
+        SistemLog::where('kategori', 'laporan_bidang')->delete();
+        return back()->with('sukses', 'Seluruh riwayat aktivitas laporan bidang berhasil dikosongkan!');
     }
 
     /**
@@ -76,6 +87,7 @@ class LaporanController extends Controller
         $namaBidangAdmin = $user->bidang->nama_bidang ?? '';
 
         $laporan = LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->findOrFail($id);
+        $pekerjaTarget = User::find($request->id_pekerja);
 
         PenugasanPekerja::create([
             'id_laporan' => $laporan->id,
@@ -85,9 +97,87 @@ class LaporanController extends Controller
             'status_tugas' => 'ditugaskan'
         ]);
 
-        $laporan->update(['status' => 'proses']);
+        // Simpan info id_pekerja dan prioritas ke tabel laporan_keluhan
+        $laporan->update([
+            'status' => 'proses',
+            'id_pekerja' => $request->id_pekerja,
+            'prioritas' => $request->prioritas,
+            'instruksi_tambahan' => $request->instruksi_tambahan
+        ]);
+
+        // CATAT AKTIVITAS KE SISTEM LOG
+        SistemLog::create([
+            'aktivitas' => "Menugaskan Tim " . ($pekerjaTarget->nama_lengkap ?? 'UPTD') . " untuk Laporan #" . $laporan->id_laporan,
+            'kategori'  => 'laporan_bidang',
+            'user_id'   => $user->id
+        ]);
 
         return redirect()->route('admin_bidang.laporan')->with('sukses', 'Laporan berhasil diproses! Pekerja telah ditugaskan ke lokasi.');
+    }
+
+    /**
+     * FUNGSI BARU 2: Kembalikan Laporan ke Admin Universal (Pusat)
+     */
+    public function kembalikanPusat(Request $request, $id)
+    {
+        $user = Auth::user();
+        $namaBidangAdmin = $user->bidang->nama_bidang ?? '';
+
+        $laporan = LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->findOrFail($id);
+
+        $alasan = $request->alasan_pengembalian ?? 'Tidak ada alasan.';
+
+        // Ubah status jadi pending, dan kosongkan kategori bidang agar kembali ditangani Admin Universal
+        $laporan->update([
+            'status' => 'pending',
+            'kategori_bidang' => null,
+            'catatan_disposisi' => "Dikembalikan oleh Bidang " . $namaBidangAdmin . ". Alasan: " . $alasan
+        ]);
+
+        // CATAT AKTIVITAS KE SISTEM LOG
+        SistemLog::create([
+            'aktivitas' => "Mengembalikan Laporan #" . $laporan->id_laporan . " ke Admin Universal.",
+            'kategori'  => 'laporan_bidang',
+            'user_id'   => $user->id
+        ]);
+
+        return redirect()->route('admin_bidang.laporan')->with('sukses', 'Laporan berhasil dikembalikan ke Admin Universal Pusat.');
+    }
+
+    /**
+     * FUNGSI BARU 3: Batalkan Penugasan Pekerja
+     */
+    public function batalkanTugas(Request $request, $id)
+    {
+        $user = Auth::user();
+        $namaBidangAdmin = $user->bidang->nama_bidang ?? '';
+
+        $laporan = LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->findOrFail($id);
+
+        $alasan = $request->alasan_pembatalan ?? 'Dibatalkan oleh Admin Bidang.';
+
+        // Kembalikan status jadi diteruskan (standby di admin bidang), copot pekerjanya
+        $laporan->update([
+            'status' => 'diteruskan',
+            'id_pekerja' => null,
+            'prioritas' => null,
+            'instruksi_tambahan' => "TUGAS DIBATALKAN: " . $alasan
+        ]);
+
+        // Jika kamu menggunakan tabel penugasan_pekerja terpisah, batalkan juga statusnya di sana
+        PenugasanPekerja::where('id_laporan', $laporan->id)->update([
+            'status_tugas' => 'dibatalkan',
+            'instruksi_tambahan' => "TUGAS DIBATALKAN: " . $alasan
+        ]);
+
+        // CATAT AKTIVITAS KE SISTEM LOG
+        SistemLog::create([
+            'aktivitas' => "Membatalkan penugasan pekerja untuk Laporan #" . $laporan->id_laporan,
+            'kategori'  => 'laporan_bidang',
+            'user_id'   => $user->id
+        ]);
+
+        return redirect()->route('admin_bidang.laporan')->with('sukses', 'Penugasan pekerja berhasil dibatalkan.');
     }
 
     /**
