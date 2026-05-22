@@ -114,6 +114,19 @@ Route::middleware(['auth'])->group(function () {
 
         // Rute untuk menarik/membatalkan penugasan dari Pekerja UPTD
         Route::post('/laporan/{id}/batal-tugas', [App\Http\Controllers\AdminBidang\LaporanController::class, 'batalkanTugas'])->name('laporan.batal_tugas');
+
+        // Rute untuk halaman Monitoring
+        Route::get('/monitoring', [App\Http\Controllers\AdminBidang\MonitoringController::class, 'indeks'])->name('monitoring');
+
+        // Rute Profil Karyawan Bidang
+        Route::get('/profil', [App\Http\Controllers\AdminBidang\ProfilController::class, 'indeks'])->name('profil');
+        Route::put('/profil/update', [App\Http\Controllers\AdminBidang\ProfilController::class, 'update'])->name('profil.update');
+        Route::post('/profil/foto', [App\Http\Controllers\AdminBidang\ProfilController::class, 'updateFoto'])->name('profil.foto');
+        Route::delete('/profil/foto/hapus', [App\Http\Controllers\AdminBidang\ProfilController::class, 'hapusFoto'])->name('profil.foto.hapus');
+        Route::delete('/profil/log/hapus', [App\Http\Controllers\AdminBidang\ProfilController::class, 'hapusLog'])->name('profil.log.hapus');
+
+        // Rute untuk menghapus SALAH SATU log
+        Route::delete('/profil/log/{id}/hapus', [App\Http\Controllers\AdminBidang\ProfilController::class, 'hapusLogSatu'])->name('profil.log.hapus_satu');
     });
 
 
