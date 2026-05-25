@@ -38,4 +38,10 @@ class LaporanKeluhan extends Model
     {
         return $this->belongsTo(Bidang::class, 'id_bidang_tujuan');
     }
+
+    public function pekerja()
+    {
+        // Menyambungkan id_pekerja di tabel laporan dengan id di tabel users
+        return $this->belongsTo(User::class, 'id_pekerja', 'id');
+    }
 }
