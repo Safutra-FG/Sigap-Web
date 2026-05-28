@@ -231,6 +231,10 @@
                                 </span>
                             @endif
                         </td>
+<<<<<<< HEAD
+                        <!-- ========================================== -->
+=======
+>>>>>>> b83879039289383542602eb1295f34a2ae1e306f
                         <td class="px-6 py-5">
                             <div class="flex items-center space-x-3">
                                 @if(isset($item->pelapor->foto_profil) && $item->pelapor->foto_profil)
