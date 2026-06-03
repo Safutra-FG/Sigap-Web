@@ -189,7 +189,7 @@
 
         <div class="lg:col-span-1 animasi-masuk delay-3">
 
-            @if($laporan->status == 'selesai' || $laporan->status == 'terkendala')
+            @if($laporan->status == 'selesai' || $laporan->status == 'terkendala' || $laporan->status == 'tuntas')
                 <div class="bg-green-600 rounded-t-2xl p-5 text-white shadow-md relative overflow-hidden">
                     <div class="absolute -right-4 -top-4 opacity-10"><i class="fas fa-check-double text-8xl"></i></div>
                     <h3 class="text-sm font-bold flex items-center relative z-10"><i class="fas fa-clipboard-check mr-2"></i> Formulir Konfirmasi Pekerjaan</h3>
@@ -227,20 +227,33 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('admin_bidang.laporan.setujui_progres', $laporan->id) ?? '#' }}" method="POST" class="mb-3">
-                        @csrf
-                        <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-extrabold text-sm py-3.5 rounded-lg shadow-sm transition transform hover:-translate-y-0.5 flex justify-center items-center">
-                            Setujui Progres <i class="fas fa-check-circle ml-2"></i>
-                        </button>
-                    </form>
+                    @if($laporan->status == 'tuntas')
+                        <div class="text-center p-4 bg-green-50 border border-green-200 rounded-lg mb-4">
+                            <p class="text-sm font-bold text-green-700"><i class="fas fa-check-double mr-2"></i> Laporan ini sudah divalidasi dan dituntaskan.</p>
+                        </div>
 
-                    <form id="form-tolak-progres" action="{{ route('admin_bidang.laporan.tolak_progres', $laporan->id) ?? '#' }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="alasan_penolakan" id="alasan_penolakan_progres">
-                        <button type="button" onclick="konfirmasiTolakProgres()" class="w-full bg-red-50 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 font-extrabold text-sm py-3 rounded-lg transition transform hover:-translate-y-0.5 flex justify-center items-center shadow-sm">
-                            Tolak Progres (Minta Revisi) <i class="fas fa-times-circle ml-2"></i>
-                        </button>
-                    </form>
+                        <form id="form-batal-konfirmasi" action="{{ route('admin_bidang.laporan.batal_konfirmasi', $laporan->id) }}" method="POST" class="mb-3">
+                            @csrf
+                            <button type="button" onclick="konfirmasiBatalKonfirmasi()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-extrabold text-sm py-3.5 rounded-lg shadow-sm transition transform hover:-translate-y-0.5 flex justify-center items-center">
+                                <i class="fas fa-undo mr-2"></i> Batalkan Konfirmasi (Tarik Ulang)
+                            </button>
+                        </form>
+                    @else
+                        <form id="form-setujui-progres" action="{{ route('admin_bidang.laporan.setujui_progres', $laporan->id) }}" method="POST" class="mb-3">
+                            @csrf
+                            <button type="button" onclick="konfirmasiSetujuiProgres()" class="w-full bg-green-500 hover:bg-green-600 text-white font-extrabold text-sm py-3.5 rounded-lg shadow-sm transition transform hover:-translate-y-0.5 flex justify-center items-center">
+                                Setujui Progres <i class="fas fa-check-circle ml-2"></i>
+                            </button>
+                        </form>
+
+                        <form id="form-tolak-progres" action="{{ route('admin_bidang.laporan.tolak_progres', $laporan->id) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="alasan_penolakan" id="alasan_penolakan_progres">
+                            <button type="button" onclick="konfirmasiTolakProgres()" class="w-full bg-red-50 hover:bg-red-500 text-red-600 hover:text-white border border-red-200 font-extrabold text-sm py-3 rounded-lg transition transform hover:-translate-y-0.5 flex justify-center items-center shadow-sm">
+                                Tolak Progres (Minta Revisi) <i class="fas fa-times-circle ml-2"></i>
+                            </button>
+                        </form>
+                    @endif
                 </div>
 
             @else
@@ -581,6 +594,48 @@
                 document.getElementById('alasan_penolakan_progres').value = result.value;
                 Swal.fire({ title: 'Memproses...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => { Swal.showLoading(); }});
                 document.getElementById('form-tolak-progres').submit();
+            }
+        });
+    }
+
+    // 5. FUNGSI KONFIRMASI SETUJUI PROGRES
+    function konfirmasiSetujuiProgres() {
+        Swal.fire({
+            title: 'Setujui Hasil Pekerjaan?',
+            text: 'Pastikan bukti foto dan keterangan dari pekerja UPTD sudah sesuai. Laporan ini akan ditandai Tuntas.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#22c55e', // Warna hijau
+            cancelButtonColor: '#9ca3af',
+            confirmButtonText: 'Ya, Setujui & Tuntaskan!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true,
+            customClass: { popup: 'rounded-2xl shadow-xl' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Memproses...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => { Swal.showLoading(); }});
+                document.getElementById('form-setujui-progres').submit();
+            }
+        });
+    }
+
+    // 6. FUNGSI KONFIRMASI BATALKAN KONFIRMASI (UNDO)
+    function konfirmasiBatalKonfirmasi() {
+        Swal.fire({
+            title: 'Batalkan Konfirmasi?',
+            text: 'Status laporan akan ditarik mundur dari Tuntas kembali menjadi Menunggu Konfirmasi.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#6b7280', // Warna abu-abu menyesuaikan tombol
+            cancelButtonColor: '#9ca3af',
+            confirmButtonText: 'Ya, Tarik Ulang!',
+            cancelButtonText: 'Tutup',
+            reverseButtons: true,
+            customClass: { popup: 'rounded-2xl shadow-xl' }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Memproses...', allowOutsideClick: false, showConfirmButton: false, didOpen: () => { Swal.showLoading(); }});
+                document.getElementById('form-batal-konfirmasi').submit();
             }
         });
     }

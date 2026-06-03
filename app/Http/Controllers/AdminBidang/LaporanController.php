@@ -275,4 +275,54 @@ class LaporanController extends Controller
 
         return $pdf->download('Rekap_Laporan_' . str_replace(' ', '_', $namaBidangAdmin) . '_' . date('Y_m_d') . '.pdf');
     }
+
+    // 1. Fungsi Menyetujui Progres
+    public function setujuiProgres($id)
+    {
+        \Illuminate\Support\Facades\DB::table('laporan_keluhan')
+            ->where('id', $id)
+            ->update([
+                'status' => 'tuntas', // Status final bahwa karyawan bidang sudah memvalidasi
+                'updated_at' => \Carbon\Carbon::now()
+            ]);
+
+        return back()->with('sukses', 'Mantap! Progres pekerjaan berhasil disetujui dan laporan telah dituntaskan.');
+    }
+
+    // 2. Fungsi Menolak Progres (Minta Revisi)
+    public function tolakProgres(\Illuminate\Http\Request $request, $id)
+    {
+        // Kembalikan status ke 'proses' agar muncul form disposisi biru kembali
+        \Illuminate\Support\Facades\DB::table('laporan_keluhan')
+            ->where('id', $id)
+            ->update([
+                'status' => 'proses',
+                'alasan_penolakan' => $request->alasan_penolakan,
+                'updated_at' => \Carbon\Carbon::now()
+            ]);
+
+        // Kembalikan status pekerja ke proses juga
+        \Illuminate\Support\Facades\DB::table('penugasan_pekerja')
+            ->where('id_laporan', $id)
+            ->update([
+                'status_tugas' => 'proses',
+                'updated_at' => \Carbon\Carbon::now()
+            ]);
+
+        return back()->with('error', 'Progres ditolak. Laporan dikembalikan ke tim UPTD untuk diperbaiki.');
+    }
+
+    // 3. Fungsi Batalkan Konfirmasi (Undo)
+    public function batalkanKonfirmasi($id)
+    {
+        // Tarik kembali statusnya menjadi 'selesai' agar bisa dikonfirmasi ulang
+        \Illuminate\Support\Facades\DB::table('laporan_keluhan')
+            ->where('id', $id)
+            ->update([
+                'status' => 'selesai',
+                'updated_at' => \Carbon\Carbon::now()
+            ]);
+
+        return back()->with('sukses', 'Konfirmasi dibatalkan. Laporan kembali ke tahap Menunggu Konfirmasi.');
+    }
 }
