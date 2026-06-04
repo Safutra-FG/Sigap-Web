@@ -74,7 +74,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/laporan/log/hapus', [App\Http\Controllers\AdminUniversal\LaporanController::class, 'hapusLog'])->name('laporan.log.hapus');
         // Tambahkan rute hapus satuan ini
         Route::delete('/laporan/log/{id}/hapus', [App\Http\Controllers\AdminUniversal\LaporanController::class, 'hapusLogSatu'])->name('laporan.log.hapus_satu');
-        
+
         // ==========================================
         // Profil Admin Universal
         // ==========================================
@@ -133,6 +133,12 @@ Route::middleware(['auth'])->group(function () {
 
         // Rute untuk menghapus SALAH SATU log
         Route::delete('/profil/log/{id}/hapus', [App\Http\Controllers\AdminBidang\ProfilController::class, 'hapusLogSatu'])->name('profil.log.hapus_satu');
+
+       // Rute untuk mengonfirmasi hasil pekerjaan UPTD
+       Route::post('/laporan/setujui-progres/{id}', [App\Http\Controllers\AdminBidang\LaporanController::class, 'setujuiProgres'])->name('laporan.setujui_progres');
+       Route::post('/laporan/tolak-progres/{id}', [App\Http\Controllers\AdminBidang\LaporanController::class, 'tolakProgres'])->name('laporan.tolak_progres');
+       // Rute untuk membatalkan konfirmasi progres (baik setujui maupun tolak)
+       Route::post('/laporan/batal-konfirmasi/{id}', [App\Http\Controllers\AdminBidang\LaporanController::class, 'batalkanKonfirmasi'])->name('laporan.batal_konfirmasi');
     });
 
     //==============================================================================================================
