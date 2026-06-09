@@ -131,8 +131,8 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="galleryContainer">
 
                         @php
-                            $urlFoto1 = \Illuminate\Support\Str::startsWith($laporan->foto_bukti, ['http://', 'https://']) ? $laporan->foto_bukti : asset('storage/' . $laporan->foto_bukti);
-                            $urlFoto2 = \Illuminate\Support\Str::startsWith($laporan->video_bukti, ['http://', 'https://']) ? $laporan->video_bukti : asset('storage/' . $laporan->video_bukti);
+                            $urlFoto1 = \Illuminate\Support\Str::startsWith($laporan->foto_bukti, ['https://']) ? $laporan->foto_bukti : asset('storage/' . $laporan->foto_bukti);
+                            $urlFoto2 = \Illuminate\Support\Str::startsWith($laporan->video_bukti, ['https://']) ? $laporan->video_bukti : asset('storage/' . $laporan->video_bukti);
                         @endphp
 
                         @if($laporan->foto_bukti)
@@ -209,7 +209,7 @@
                             <div class="grid grid-cols-2 gap-2">
                                 @foreach($laporan->penugasan->buktiProgres as $bukti)
                                     @php
-                                        $urlBukti = \Illuminate\Support\Str::startsWith($bukti->file_path, ['http://', 'https://']) ? $bukti->file_path : asset('storage/' . $bukti->file_path);
+                                        $urlBukti = \Illuminate\Support\Str::startsWith($bukti->file_path, [ 'https://']) ? $bukti->file_path : asset('storage/' . $bukti->file_path);
                                     @endphp
                                     <div class="aspect-video rounded-lg overflow-hidden border border-gray-200 bg-gray-50 cursor-pointer" onclick="openLightbox('{{ $urlBukti }}', 'image')">
                                         <img src="{{ $urlBukti }}" class="w-full h-full object-cover">
@@ -324,7 +324,7 @@
                             <div class="grid grid-cols-2 gap-2">
                                 @foreach($laporan->penugasan->buktiProgres as $bukti)
                                     @php
-                                        $urlBukti = \Illuminate\Support\Str::startsWith($bukti->file_path, ['http://', 'https://']) ? $bukti->file_path : asset('storage/' . $bukti->file_path);
+                                        $urlBukti = \Illuminate\Support\Str::startsWith($bukti->file_path, ['https://']) ? $bukti->file_path : asset('storage/' . $bukti->file_path);
                                     @endphp
                                     <div class="relative group aspect-video rounded-lg overflow-hidden border border-gray-200 shadow-sm cursor-pointer bg-gray-50" onclick="openLightbox('{{ $urlBukti }}', 'image')">
                                         <img src="{{ $urlBukti }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
