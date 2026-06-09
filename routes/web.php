@@ -15,9 +15,6 @@ use App\Http\Controllers\AdminBidang\LaporanController as LaporanBidangControlle
 use App\Http\Controllers\Pekerja\TugasController as TugasPekerja;
 
 
-Route::get('/test', function () {
-    return 'Test berhasil';
-});
 
 Route::get('/', [AutentikasiController::class, 'tampilLogin'])->name('login');
 Route::post('/login/proses', [AutentikasiController::class, 'prosesLogin'])->name('login.proses');

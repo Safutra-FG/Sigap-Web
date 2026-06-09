@@ -10,7 +10,7 @@ class AutentikasiController extends Controller
     // Menampilkan halaman login (welcome.blade.php)
     public function tampilLogin()
     {
-        return 'login page';
+        return view('welcome');
     }
 
     // Proses Autentikasi
