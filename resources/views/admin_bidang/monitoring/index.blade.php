@@ -141,9 +141,19 @@
                                 </td>
                                 <td class="py-4 px-2">
                                     @if($antrean->status == 'proses')
-                                        <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-[10px] font-bold">Sedang Dikerjakan</span>
+                                        <span class="bg-indigo-50 text-indigo-600 px-2 py-1 rounded text-[10px] font-bold">Dalam Pengerjaan</span>
+                                    @elseif($antrean->status == 'disurvei')
+                                        <span class="bg-cyan-50 text-cyan-600 px-2 py-1 rounded text-[10px] font-bold">Sedang Disurvei</span>
+                                    @elseif($antrean->status == 'menunggu_validasi')
+                                        <span class="bg-orange-50 text-orange-600 px-2 py-1 rounded text-[10px] font-bold">Menunggu Validasi</span>
+                                    @elseif($antrean->status == 'terkendala')
+                                        <span class="bg-red-50 text-red-600 px-2 py-1 rounded text-[10px] font-bold">Terkendala</span>
+                                    @elseif($antrean->status == 'revisi')
+                                        <span class="bg-purple-50 text-purple-600 px-2 py-1 rounded text-[10px] font-bold">Perlu Revisi</span>
+                                    @elseif($antrean->status == 'ditunda')
+                                        <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px] font-bold">Ditunda</span>
                                     @else
-                                        <span class="bg-yellow-50 text-yellow-600 px-2 py-1 rounded text-[10px] font-bold">Diteruskan</span>
+                                        <span class="bg-yellow-50 text-yellow-600 px-2 py-1 rounded text-[10px] font-bold">Menunggu Penugasan</span>
                                     @endif
                                 </td>
                                 <td class="py-4 px-2 text-gray-500">{{ $antrean->updated_at->format('H:i') }} WIB</td>
@@ -173,25 +183,30 @@
             </div>
 
             <div class="bg-[#2B354E] rounded-2xl shadow-sm p-6 text-white animasi-masuk delay-3">
-                <h3 class="font-bold text-sm mb-5 border-b border-gray-600 pb-3">Ringkasan Hari Ini</h3>
+                <h3 class="font-bold text-sm mb-5 border-b border-gray-600 pb-3">Ringkasan Penanganan</h3>
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div class="bg-[#1E273D] p-4 rounded-xl border border-gray-600">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Total Aktif</p>
-                        <p class="text-2xl font-bold">{{ $total_tugas }}</p>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Total Laporan</p>
+                        <p class="text-2xl font-bold">{{ $total_laporan ?? $total_tugas }}</p>
                     </div>
                     <div class="bg-[#1E273D] p-4 rounded-xl border border-gray-600">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Tugas Selesai</p>
-                        <p class="text-2xl font-bold">{{ $tugas_selesai }}</p>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Total Selesai</p>
+                        <p class="text-2xl font-bold text-green-400">{{ $total_selesai ?? $tugas_selesai }}</p>
                     </div>
                 </div>
-                <div>
+                <div class="mb-4">
                     <div class="flex justify-between text-xs font-bold mb-2">
-                        <span class="text-gray-400">Efisiensi Tim</span>
+                        <span class="text-gray-400">Tingkat Penyelesaian</span>
                         <span class="text-yellow-400">{{ $efisiensi }}%</span>
                     </div>
                     <div class="w-full bg-[#1E273D] rounded-full h-2">
                         <div class="bg-yellow-400 h-2 rounded-full transition-all duration-1000" style="width: {{ $efisiensi }}%"></div>
                     </div>
+                    <p class="text-[10px] text-gray-500 mt-2">Persentase laporan selesai dari total laporan yang ditangani bidang ini.</p>
+                </div>
+                <div class="bg-[#1E273D] p-3 rounded-xl border border-gray-600">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Selesai Hari Ini</p>
+                    <p class="text-xl font-bold">{{ $tugas_selesai }} <span class="text-xs text-gray-400 font-normal">laporan</span></p>
                 </div>
             </div>
 

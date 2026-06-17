@@ -23,19 +23,20 @@ class LaporanController extends Controller
 
         $laporan_masuk = LaporanKeluhan::with('pelapor')
             ->where('kategori_bidang', $namaBidangAdmin)
-            ->whereIn('status', ['diteruskan', 'menunggu_validasi', 'proses', 'terkendala', 'revisi', 'ditunda', 'selesai', 'ditolak'])
+            ->whereIn('status', ['diteruskan', 'disurvei', 'menunggu_validasi', 'proses', 'terkendala', 'revisi', 'ditunda', 'selesai', 'ditolak'])
             ->orderBy('updated_at', 'desc')
             ->paginate(10);
 
         $statistik = [
-            'total'    => LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->whereIn('status', ['diteruskan', 'menunggu_validasi', 'proses', 'terkendala', 'revisi', 'ditunda', 'selesai', 'ditolak'])->count(),
-            'menunggu' => LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->whereIn('status', ['diteruskan', 'menunggu_validasi'])->count(),
-            'proses'   => LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->whereIn('status', ['proses', 'terkendala', 'revisi', 'ditunda'])->count(),
-            'selesai'  => LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->where('status', 'selesai')->count(),
+            'total'         => LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->whereIn('status', ['diteruskan', 'disurvei', 'menunggu_validasi', 'proses', 'terkendala', 'revisi', 'ditunda', 'selesai', 'ditolak'])->count(),
+            'menunggu'      => LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->whereIn('status', ['diteruskan'])->count(),
+            'disurvei'      => LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->whereIn('status', ['disurvei', 'menunggu_validasi'])->count(),
+            'proses'        => LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->whereIn('status', ['proses', 'terkendala', 'revisi', 'ditunda'])->count(),
+            'selesai'       => LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->where('status', 'selesai')->count(),
         ];
 
         $sebaran_laporan = LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)
-            ->whereIn('status', ['diteruskan', 'menunggu_validasi', 'proses', 'terkendala', 'revisi', 'ditunda', 'selesai'])
+            ->whereIn('status', ['diteruskan', 'disurvei', 'menunggu_validasi', 'proses', 'terkendala', 'revisi', 'ditunda', 'selesai'])
             ->get(['id', 'id_laporan', 'lokasi_gps', 'status', 'kategori_bidang']);
 
         // AMBIL DATA AKTIVITAS UNTUK DITAMPILKAN DI SIDEBAR PETA
@@ -47,7 +48,8 @@ class LaporanController extends Controller
         //=================================================================================
         // fungsi filter dan sorting
         // 1. Buat Query Dasar
-        $query = \App\Models\LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin);
+        $query = \App\Models\LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)
+            ->whereIn('status', ['diteruskan', 'disurvei', 'menunggu_validasi', 'proses', 'terkendala', 'revisi', 'ditunda', 'selesai', 'ditolak']);
 
         // 2. Logika Filter Status
         if ($request->filled('status') && $request->status !== 'semua') {
@@ -120,22 +122,20 @@ class LaporanController extends Controller
             'status_tugas' => 'ditugaskan'
         ]);
 
-        // Simpan info id_pekerja dan prioritas ke tabel laporan_keluhan
+        // Status laporan diubah menjadi 'disurvei' — pekerja harus melakukan survei lapangan terlebih dahulu
+        // sebelum pekerjaan dimulai. Admin bidang harus memvalidasi hasil survei.
         $laporan->update([
-            'status' => 'proses',
-            'id_pekerja' => $request->id_pekerja,
-            'prioritas' => $request->prioritas,
-            'instruksi_tambahan' => $request->instruksi_tambahan
+            'status' => 'disurvei',
         ]);
 
         // CATAT AKTIVITAS KE SISTEM LOG
         LogAktivitas::create([
-            'aktivitas' => "Menugaskan Tim " . ($pekerjaTarget->nama_lengkap ?? 'UPTD') . " untuk Laporan #" . $laporan->id_laporan,
+            'aktivitas' => "Menugaskan Tim " . ($pekerjaTarget->nama_lengkap ?? 'UPTD') . " untuk Laporan #" . $laporan->id_laporan . " (Menunggu Survei Lapangan)",
             'kategori'  => 'laporan_bidang',
             'user_id'   => $user->id
         ]);
 
-        return redirect()->route('admin_bidang.laporan')->with('sukses', 'Laporan berhasil diproses! Pekerja telah ditugaskan ke lokasi.');
+        return redirect()->route('admin_bidang.laporan')->with('sukses', 'Penugasan berhasil dikirim! Pekerja akan melakukan survei lapangan terlebih dahulu.');
     }
 
     /**
@@ -143,12 +143,19 @@ class LaporanController extends Controller
      */
     public function kembalikanPusat(Request $request, $id)
     {
+        $request->validate([
+            'alasan_pengembalian' => 'required|string|max:1000'
+        ], [
+            'alasan_pengembalian.required' => 'Alasan pengembalian wajib diisi.',
+            'alasan_pengembalian.max'      => 'Alasan pengembalian maksimal 1000 karakter.'
+        ]);
+
         $user = Auth::user();
         $namaBidangAdmin = $user->bidang->nama_bidang ?? '';
 
         $laporan = LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->findOrFail($id);
 
-        $alasan = $request->alasan_pengembalian ?? 'Tidak ada alasan.';
+        $alasan = $request->alasan_pengembalian;
 
         // Ubah status jadi dikembalikan, dan kosongkan kategori bidang agar kembali ditangani Admin Universal
         $laporan->update([
@@ -172,12 +179,19 @@ class LaporanController extends Controller
      */
     public function batalkanTugas(Request $request, $id)
     {
+        $request->validate([
+            'alasan_pembatalan' => 'required|string|max:1000'
+        ], [
+            'alasan_pembatalan.required' => 'Alasan pembatalan wajib diisi.',
+            'alasan_pembatalan.max'      => 'Alasan pembatalan maksimal 1000 karakter.'
+        ]);
+
         $user = Auth::user();
         $namaBidangAdmin = $user->bidang->nama_bidang ?? '';
 
         $laporan = LaporanKeluhan::where('kategori_bidang', $namaBidangAdmin)->findOrFail($id);
 
-        $alasan = $request->alasan_pembatalan ?? 'Dibatalkan oleh Admin Bidang.';
+        $alasan = $request->alasan_pembatalan;
 
         // Kembalikan status jadi diteruskan (standby di admin bidang), copot pekerjanya
         $laporan->update([
@@ -187,11 +201,13 @@ class LaporanController extends Controller
             'instruksi_tambahan' => "TUGAS DIBATALKAN: " . $alasan
         ]);
 
-        // Jika kamu menggunakan tabel penugasan_pekerja terpisah, batalkan juga statusnya di sana
-        PenugasanPekerja::where('id_laporan', $laporan->id)->update([
-            'status_tugas' => 'dibatalkan',
-            'instruksi_tambahan' => "TUGAS DIBATALKAN: " . $alasan
-        ]);
+        // Batalkan juga statusnya di tabel penugasan_pekerja
+        PenugasanPekerja::where('id_laporan', $laporan->id)
+            ->whereNotIn('status_tugas', ['dibatalkan', 'selesai'])
+            ->update([
+                'status_tugas' => 'dibatalkan',
+                'instruksi_tambahan' => "TUGAS DIBATALKAN: " . $alasan
+            ]);
 
         // CATAT AKTIVITAS KE SISTEM LOG
         LogAktivitas::create([
@@ -325,7 +341,8 @@ class LaporanController extends Controller
             'user_id'   => $user->id
         ]);
 
-        return redirect()->route('admin_bidang.laporan.detail', $id)->with('sukses', $msg);
+        $type = ($aksi === 'acc') ? 'sukses' : 'warning';
+        return redirect()->route('admin_bidang.laporan.detail', $id)->with($type, $msg);
     }
 
     /**
@@ -360,7 +377,10 @@ class LaporanController extends Controller
     public function tolakProgres(Request $request, $id)
     {
         $request->validate([
-            'alasan_penolakan' => 'required|string',
+            'alasan_penolakan' => 'required|string|max:1000',
+        ], [
+            'alasan_penolakan.required' => 'Alasan penolakan wajib diisi.',
+            'alasan_penolakan.max'      => 'Alasan penolakan maksimal 1000 karakter.',
         ]);
 
         $user = Auth::user();
@@ -381,7 +401,7 @@ class LaporanController extends Controller
             'user_id'   => $user->id
         ]);
 
-        return redirect()->route('admin_bidang.laporan.detail', $id)->with('sukses', 'Progres ditolak. Tim UPTD telah diminta melakukan revisi.');
+        return redirect()->route('admin_bidang.laporan.detail', $id)->with('warning', 'Progres ditolak. Tim UPTD telah diminta melakukan revisi.');
     }
 }
 

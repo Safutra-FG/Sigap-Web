@@ -61,13 +61,24 @@ class BidangController extends Controller
     public function simpan(Request $request)
     {
         $request->validate([
-            'kode_bidang' => 'required',
-            'nama_bidang' => 'required',
-            'ikon' => 'required',
-            'deskripsi' => 'required'
+            'kode_bidang' => 'required|string|max:50|unique:bidang,kode_bidang',
+            'nama_bidang' => 'required|string|max:255',
+            'ikon' => 'required|string|max:50',
+            'deskripsi' => 'required|string'
+        ], [
+            'kode_bidang.required' => 'Kode bidang wajib diisi.',
+            'kode_bidang.unique'   => 'Kode bidang sudah digunakan.',
+            'nama_bidang.required' => 'Nama bidang wajib diisi.',
+            'ikon.required'        => 'Ikon bidang wajib diisi.',
+            'deskripsi.required'   => 'Deskripsi bidang wajib diisi.'
         ]);
 
-        Bidang::create($request->all());
+        Bidang::create([
+            'kode_bidang' => $request->kode_bidang,
+            'nama_bidang' => $request->nama_bidang,
+            'ikon'        => $request->ikon,
+            'deskripsi'   => $request->deskripsi
+        ]);
 
         \App\Models\LogAktivitas::create([
             'user_id' => auth()->id(),
@@ -83,11 +94,18 @@ class BidangController extends Controller
     {
         // 1. Validasi Input
         $request->validate([
-            'kode_bidang' => 'required',
-            'nama_bidang' => 'required',
-            'ikon' => 'required',
-            'deskripsi' => 'required',
+            'kode_bidang' => 'required|string|max:50|unique:bidang,kode_bidang,'.$id,
+            'nama_bidang' => 'required|string|max:255',
+            'ikon' => 'required|string|max:50',
+            'deskripsi' => 'required|string',
             'status_aktif' => 'required|boolean'
+        ], [
+            'kode_bidang.required' => 'Kode bidang wajib diisi.',
+            'kode_bidang.unique'   => 'Kode bidang sudah digunakan.',
+            'nama_bidang.required' => 'Nama bidang wajib diisi.',
+            'ikon.required'        => 'Ikon bidang wajib diisi.',
+            'deskripsi.required'   => 'Deskripsi bidang wajib diisi.',
+            'status_aktif.required'=> 'Status aktif wajib dipilih.'
         ]);
 
         $bidang = Bidang::findOrFail($id);
@@ -104,7 +122,7 @@ class BidangController extends Controller
         if ($statusLama != $request->status_aktif) {
 
             // Tentukan teks status akun baru. (Ubah 'nonaktif' jadi 'non-aktif' jika di databasemu menggunakan strip)
-            $statusAkunBaru = $request->status_aktif ? 'aktif' : 'nonaktif';
+            $statusAkunBaru = $request->status_aktif ? 'aktif' : 'non-aktif';
 
             // Cari semua user yang ada di bidang ini, lalu update statusnya secara massal
             \App\Models\User::where('id_bidang', $id)->update([

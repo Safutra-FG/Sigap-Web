@@ -97,12 +97,22 @@ class LaporanController extends Controller
         $request->validate([
             'judul'     => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'kategori'  => 'nullable|string',   // admin yg mendisposisikan
+            'kategori'  => 'nullable|string',
             'latitude'  => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'alamat'    => 'nullable|string',
             'foto'      => 'nullable|array|max:5',
             'foto.*'    => 'image|mimes:jpg,jpeg,png|max:5120',
+        ], [
+            'judul.required'     => 'Judul laporan wajib diisi.',
+            'judul.max'          => 'Judul laporan maksimal 255 karakter.',
+            'deskripsi.required' => 'Deskripsi laporan wajib diisi.',
+            'foto.max'           => 'Maksimal 5 foto yang dapat diunggah.',
+            'foto.*.image'       => 'File yang diunggah harus berupa gambar.',
+            'foto.*.mimes'       => 'Format foto harus JPG, JPEG, atau PNG.',
+            'foto.*.max'         => 'Ukuran setiap foto maksimal 5 MB.',
+            'latitude.numeric'   => 'Data koordinat latitude tidak valid.',
+            'longitude.numeric'  => 'Data koordinat longitude tidak valid.',
         ]);
 
         // Simpan foto utama (pertama)
@@ -150,7 +160,11 @@ class LaporanController extends Controller
 
         $request->validate([
             'status'  => 'required|in:pending,diteruskan,dikembalikan,menunggu_validasi,ditolak,ditunda,proses,terkendala,revisi,selesai',
-            'catatan' => 'nullable|string',
+            'catatan' => 'nullable|string|max:1000',
+        ], [
+            'status.required' => 'Status laporan wajib dipilih.',
+            'status.in'       => 'Status laporan tidak valid.',
+            'catatan.max'     => 'Catatan maksimal 1000 karakter.',
         ]);
 
         $laporan = LaporanKeluhan::findOrFail($id);

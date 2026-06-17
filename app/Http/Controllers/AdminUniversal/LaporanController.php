@@ -61,7 +61,7 @@ class LaporanController extends Controller
                             ->get();
 
         // Ambil daftar bidang aktif yang ada di database untuk menu dropdown filter
-        $daftar_bidang = Bidang::where('status', 'aktif')->pluck('nama_bidang');
+        $daftar_bidang = Bidang::where('status_aktif', true)->pluck('nama_bidang');
 
         // 9. MENGAMBIL DATA LOG (AKTIVITAS) UNTUK TAMPILAN
         // Menggunakan LogAktivitas
@@ -100,7 +100,10 @@ class LaporanController extends Controller
     public function disposisi(Request $request, $id)
     {
         $request->validate([
-            'id_bidang_tujuan' => 'required'
+            'id_bidang_tujuan' => 'required|exists:bidang,id'
+        ], [
+            'id_bidang_tujuan.required' => 'Bidang tujuan wajib dipilih.',
+            'id_bidang_tujuan.exists'   => 'Bidang tujuan tidak valid.'
         ]);
 
         $laporan = LaporanKeluhan::findOrFail($id);
@@ -115,7 +118,10 @@ class LaporanController extends Controller
     public function tolak(Request $request, $id)
     {
         $request->validate([
-            'alasan_penolakan' => 'required'
+            'alasan_penolakan' => 'required|string|max:1000'
+        ], [
+            'alasan_penolakan.required' => 'Alasan penolakan wajib diisi.',
+            'alasan_penolakan.max'      => 'Alasan penolakan maksimal 1000 karakter.'
         ]);
 
         $laporan = LaporanKeluhan::findOrFail($id);
@@ -124,7 +130,8 @@ class LaporanController extends Controller
             'alasan_penolakan' => $request->alasan_penolakan
         ]);
 
-        return redirect()->route('admin_universal.laporan')->with('sukses', 'Laporan telah ditolak.');
+        return redirect()->route('admin_universal.laporan')
+            ->with('warning', 'Laporan telah ditolak.');
     }
 
     public function ekspor()
@@ -173,9 +180,18 @@ class LaporanController extends Controller
     public function simpan(Request $request)
     {
         $request->validate([
-            'kategori_bidang' => 'required',
-            'alamat_map' => 'required',
-            'deskripsi_laporan' => 'required'
+            'kategori_bidang'   => 'required|exists:bidang,id',
+            'alamat_map'        => 'required|string',
+            'latitude'          => 'nullable|numeric',
+            'longitude'         => 'nullable|numeric',
+            'deskripsi_laporan' => 'required|string',
+        ], [
+            'kategori_bidang.required'   => 'Kategori/Bidang tujuan wajib dipilih.',
+            'kategori_bidang.exists'     => 'Kategori/Bidang tidak valid.',
+            'alamat_map.required'        => 'Alamat lokasi wajib diisi.',
+            'deskripsi_laporan.required' => 'Deskripsi laporan wajib diisi.',
+            'latitude.numeric'           => 'Format latitude tidak valid.',
+            'longitude.numeric'          => 'Format longitude tidak valid.',
         ]);
 
         LaporanKeluhan::create([
@@ -184,7 +200,7 @@ class LaporanController extends Controller
             'kategori_bidang' => $request->kategori_bidang,
             'deskripsi_laporan' => $request->deskripsi_laporan,
             'alamat_map' => $request->alamat_map,
-            'lokasi_gps' => '-6.5627, 107.7613',
+            'lokasi_gps' => ($request->latitude && $request->longitude) ? $request->latitude . ', ' . $request->longitude : null,
             'status' => 'pending'
         ]);
 
@@ -201,6 +217,13 @@ class LaporanController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
+        $request->validate([
+            'status' => 'required|in:pending,diteruskan,dikembalikan,menunggu_validasi,ditolak,ditunda,proses,terkendala,revisi,selesai'
+        ], [
+            'status.required' => 'Status laporan wajib dipilih.',
+            'status.in'       => 'Status laporan tidak valid.'
+        ]);
+
         $laporan = LaporanKeluhan::findOrFail($id);
         $laporan->status = $request->status;
 

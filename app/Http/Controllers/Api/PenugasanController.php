@@ -25,7 +25,11 @@ class PenugasanController extends Controller
             ->get()
             ->map(fn($t) => $this->formatTugas($t));
 
-        return response()->json(['data' => $tugas]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar tugas berhasil diambil.',
+            'data'    => $tugas
+        ]);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

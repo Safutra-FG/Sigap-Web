@@ -56,14 +56,5 @@ class BerandaController extends Controller
             'bidang', 'total_laporan', 'laporan_mendesak', 'laporan_proses', 'laporan_selesai', 'sebaran_laporan', 'tim_pekerja'
         ));
 
-        // 5. Kirim semua data ke tampilan indeks.blade.php
-        return view('admin_bidang.beranda.indeks', compact(
-            'bidang',
-            'total_laporan',
-            'laporan_mendesak',
-            'laporan_proses',
-            'laporan_selesai',
-            'sebaran_laporan'
-        ));
     }
 }

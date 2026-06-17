@@ -38,9 +38,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/bidang/simpan', [BidangController::class, 'simpan'])->name('bidang.simpan');
         Route::put('/bidang/perbarui/{id}', [BidangController::class, 'perbarui'])->name('bidang.perbarui');
         Route::delete('/bidang/hapus/{id}', [BidangController::class, 'hapus'])->name('bidang.hapus');
-        Route::post('/bidang/simpan', [BidangController::class, 'simpan'])->name('bidang.simpan');
-        Route::put('/bidang/perbarui/{id}', [BidangController::class, 'perbarui'])->name('bidang.perbarui');
-        Route::delete('/bidang/hapus/{id}', [BidangController::class, 'hapus'])->name('bidang.hapus');
         Route::get('/bidang/export', [BidangController::class, 'exportCsv'])->name('bidang.export'); // Perbaikan nama route
 
         // Beranda & Peta Pusat
@@ -54,7 +51,8 @@ Route::middleware(['auth'])->group(function () {
         // Kelola Laporan
         Route::get('/laporan', [LaporanUniversal::class, 'indeks'])->name('laporan');
         Route::post('/laporan/simpan-manual', [LaporanUniversal::class, 'simpan'])->name('laporan.simpan');
-        Route::delete('/admin-universal/laporan/log/hapus', [App\Http\Controllers\AdminUniversal\LaporanController::class, 'hapusSemuaLog'])->name('admin_universal.laporan.log.hapus');
+        // Hapus semua log laporan (menggunakan method yang ada: hapusLog)
+        Route::delete('/laporan/log/hapus-semua', [App\Http\Controllers\AdminUniversal\LaporanController::class, 'hapusLog'])->name('admin_universal.laporan.log.hapus_semua');
 
 
 
@@ -135,12 +133,20 @@ Route::middleware(['auth'])->group(function () {
         // Rute untuk menghapus SALAH SATU log
         Route::delete('/profil/log/{id}/hapus', [App\Http\Controllers\AdminBidang\ProfilController::class, 'hapusLogSatu'])->name('profil.log.hapus_satu');
 
-       // Rute untuk mengonfirmasi hasil pekerjaan UPTD
+        // Rute untuk mengonfirmasi hasil pekerjaan UPTD
        Route::post('/laporan/setujui-progres/{id}', [App\Http\Controllers\AdminBidang\LaporanController::class, 'setujuiProgres'])->name('laporan.setujui_progres');
        Route::post('/laporan/tolak-progres/{id}', [App\Http\Controllers\AdminBidang\LaporanController::class, 'tolakProgres'])->name('laporan.tolak_progres');
-       // Rute untuk membatalkan konfirmasi progres (baik setujui maupun tolak)
-       Route::post('/laporan/batal-konfirmasi/{id}', [App\Http\Controllers\AdminBidang\LaporanController::class, 'batalkanKonfirmasi'])->name('laporan.batal_konfirmasi');
+       // Catatan: batalkanKonfirmasi belum diimplementasikan di controller
     });
+
+    // ==========================================
+    // RUTE PEKERJA BIDANG / UPTD
+    // ==========================================
+    Route::prefix('pekerja')->name('pekerja.')->group(function () {
+        Route::get('/beranda', [TugasPekerja::class, 'indeks'])->name('beranda');
+        Route::post('/tugas/{id}/update-progres', [TugasPekerja::class, 'updateProgres'])->name('tugas.update_progres');
+    });
+
 
     //==============================================================================================================
     // Rute Uji Coba Notifikasi (Bisa dihapus nanti jika sisi Masyarakat sudah dibuat)

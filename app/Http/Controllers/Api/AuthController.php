@@ -18,9 +18,23 @@ class AuthController extends Controller
         $request->validate([
             'name'                  => 'required|string|max:255',
             'email'                 => 'required|email|unique:users,email',
-            'username'              => 'required|string|unique:users',
+            'username'              => 'required|string|min:3|max:50|unique:users,username',
             'phone'                 => 'nullable|string|max:20',
-            'password'              => 'required|min:6|confirmed',
+            'password'              => 'required|min:8|confirmed',
+        ], [
+            'name.required'                => 'Nama lengkap wajib diisi.',
+            'name.max'                     => 'Nama lengkap maksimal 255 karakter.',
+            'email.required'               => 'Alamat email wajib diisi.',
+            'email.email'                  => 'Format email tidak valid.',
+            'email.unique'                 => 'Email ini sudah terdaftar. Gunakan email lain atau login.',
+            'username.required'            => 'Username wajib diisi.',
+            'username.min'                 => 'Username minimal 3 karakter.',
+            'username.max'                 => 'Username maksimal 50 karakter.',
+            'username.unique'              => 'Username ini sudah dipakai. Coba username lain.',
+            'phone.max'                    => 'Nomor HP maksimal 20 digit.',
+            'password.required'            => 'Kata sandi wajib diisi.',
+            'password.min'                 => 'Kata sandi minimal 8 karakter.',
+            'password.confirmed'           => 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
         $user = User::create([
@@ -48,8 +62,11 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email'    => 'required|string',  // bisa email atau username
+            'email'    => 'required|string',
             'password' => 'required|string',
+        ], [
+            'email.required'    => 'Email atau username wajib diisi.',
+            'password.required' => 'Kata sandi wajib diisi.',
         ]);
 
         // Coba login via email dulu, fallback ke username
@@ -104,7 +121,14 @@ class AuthController extends Controller
      */
     public function forgotPassword(Request $request)
     {
-        $request->validate(['email' => 'required|email|exists:users,email']);
+        $request->validate(
+            ['email' => 'required|email|exists:users,email'],
+            [
+                'email.required' => 'Alamat email wajib diisi.',
+                'email.email'    => 'Format email tidak valid.',
+                'email.exists'   => 'Email tidak terdaftar di sistem. Periksa kembali.',
+            ]
+        );
 
         $otp  = rand(100000, 999999);
         $user = User::where('email', $request->email)->first();
@@ -129,6 +153,10 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'required|email',
             'code'  => 'required|string',
+        ], [
+            'email.required' => 'Email wajib diisi.',
+            'email.email'    => 'Format email tidak valid.',
+            'code.required'  => 'Kode OTP wajib diisi.',
         ]);
 
         $user = User::where('email', $request->email)
@@ -153,7 +181,14 @@ class AuthController extends Controller
         $request->validate([
             'email'    => 'required|email',
             'code'     => 'required|string',
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|min:8|confirmed',
+        ], [
+            'email.required'    => 'Email wajib diisi.',
+            'email.email'       => 'Format email tidak valid.',
+            'code.required'     => 'Kode OTP wajib diisi.',
+            'password.required' => 'Kata sandi baru wajib diisi.',
+            'password.min'      => 'Kata sandi baru minimal 8 karakter.',
+            'password.confirmed'=> 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
         $user = User::where('email', $request->email)

@@ -16,7 +16,6 @@ class User extends Authenticatable
         'password', 'peran', 'id_bidang', 'status_akun',
         'foto_profil', 'terakhir_login',
         'otp_code', 'otp_expires_at', // untuk reset password mobile
-        'password', 'peran', 'id_bidang', 'status_akun', 'foto_profil',
         'kantor_wilayah',
     ];
 

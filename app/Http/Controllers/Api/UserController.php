@@ -26,6 +26,10 @@ class UserController extends Controller
         $request->validate([
             'name'  => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
+        ], [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'name.max'      => 'Nama lengkap maksimal 255 karakter.',
+            'phone.max'     => 'Nomor HP maksimal 20 digit.',
         ]);
 
         $request->user()->update([
@@ -46,6 +50,11 @@ class UserController extends Controller
     {
         $request->validate([
             'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        ], [
+            'foto.required' => 'File foto wajib diunggah.',
+            'foto.image'    => 'File harus berupa gambar.',
+            'foto.mimes'    => 'Format foto harus JPG, JPEG, atau PNG.',
+            'foto.max'      => 'Ukuran foto maksimal 2 MB.',
         ]);
 
         $user = $request->user();
@@ -59,7 +68,7 @@ class UserController extends Controller
         $user->update(['foto_profil' => $path]);
 
         return response()->json([
-            'message'  => 'Foto profil diperbarui.',
+            'message'  => 'Foto profil berhasil diperbarui.',
             'foto_url' => asset('storage/' . $path),
         ]);
     }
@@ -71,7 +80,12 @@ class UserController extends Controller
     {
         $request->validate([
             'current_password' => 'required',
-            'password'         => 'required|min:6|confirmed',
+            'password'         => 'required|min:8|confirmed',
+        ], [
+            'current_password.required' => 'Kata sandi saat ini wajib diisi.',
+            'password.required'         => 'Kata sandi baru wajib diisi.',
+            'password.min'              => 'Kata sandi baru minimal 8 karakter.',
+            'password.confirmed'        => 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
         $user = $request->user();

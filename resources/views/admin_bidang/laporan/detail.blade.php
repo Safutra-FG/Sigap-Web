@@ -55,17 +55,37 @@
                     <span class="bg-yellow-400 text-white text-xs font-extrabold px-4 py-2 rounded-full uppercase tracking-wider shadow-sm flex items-center shadow-yellow-200">
                         <i class="fas fa-clock mr-2"></i> Menunggu Penugasan
                     </span>
+                @elseif($laporan->status == 'disurvei')
+                    <span class="bg-cyan-500 text-white text-xs font-extrabold px-4 py-2 rounded-full uppercase tracking-wider shadow-sm flex items-center shadow-cyan-200">
+                        <i class="fas fa-search-location mr-2 animate-pulse"></i> Sedang Disurvei
+                    </span>
+                @elseif($laporan->status == 'menunggu_validasi')
+                    <span class="bg-orange-500 text-white text-xs font-extrabold px-4 py-2 rounded-full uppercase tracking-wider shadow-sm flex items-center shadow-orange-200">
+                        <i class="fas fa-clipboard-check mr-2 animate-pulse"></i> Menunggu Validasi Admin
+                    </span>
                 @elseif($laporan->status == 'proses')
                     <span class="bg-indigo-500 text-white text-xs font-extrabold px-4 py-2 rounded-full uppercase tracking-wider shadow-sm flex items-center shadow-indigo-200">
                         <i class="fas fa-tools mr-2 animate-pulse"></i> Dalam Pengerjaan
                     </span>
+                @elseif($laporan->status == 'terkendala')
+                    <span class="bg-red-500 text-white text-xs font-extrabold px-4 py-2 rounded-full uppercase tracking-wider shadow-sm flex items-center shadow-red-200">
+                        <i class="fas fa-exclamation-triangle mr-2"></i> Terkendala
+                    </span>
+                @elseif($laporan->status == 'revisi')
+                    <span class="bg-purple-500 text-white text-xs font-extrabold px-4 py-2 rounded-full uppercase tracking-wider shadow-sm flex items-center shadow-purple-200">
+                        <i class="fas fa-redo mr-2"></i> Perlu Revisi
+                    </span>
+                @elseif($laporan->status == 'ditunda')
+                    <span class="bg-gray-500 text-white text-xs font-extrabold px-4 py-2 rounded-full uppercase tracking-wider shadow-sm flex items-center">
+                        <i class="fas fa-pause-circle mr-2"></i> Ditunda
+                    </span>
                 @elseif($laporan->status == 'selesai')
                     <span class="bg-green-500 text-white text-xs font-extrabold px-4 py-2 rounded-full uppercase tracking-wider shadow-sm flex items-center shadow-green-200">
-                        <i class="fas fa-check-circle mr-2"></i> Menunggu Konfirmasi Progres
+                        <i class="fas fa-check-circle mr-2"></i> Selesai
                     </span>
-                @elseif($laporan->status == 'terkendala' || $laporan->status == 'perlu_perbaikan')
-                     <span class="bg-red-500 text-white text-xs font-extrabold px-4 py-2 rounded-full uppercase tracking-wider shadow-sm flex items-center shadow-red-200">
-                        <i class="fas fa-exclamation-triangle mr-2"></i> Terkendala / Perlu Perbaikan
+                @elseif($laporan->status == 'ditolak')
+                    <span class="bg-red-700 text-white text-xs font-extrabold px-4 py-2 rounded-full uppercase tracking-wider shadow-sm flex items-center">
+                        <i class="fas fa-ban mr-2"></i> Ditolak
                     </span>
                 @endif
             </div>
@@ -243,12 +263,34 @@
                     @endif
                 </div>
 
+            @elseif($laporan->status === 'disurvei')
+                {{-- MENUNGGU LAPORAN SURVEI DARI PEKERJA --}}
+                <div class="bg-cyan-600 rounded-t-2xl p-5 text-white shadow-md relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 opacity-10"><i class="fas fa-search-location text-8xl"></i></div>
+                    <h3 class="text-sm font-bold flex items-center relative z-10"><i class="fas fa-search-location mr-2"></i> Survei Lapangan Berlangsung</h3>
+                    <p class="text-[10px] text-cyan-200 mt-1 uppercase tracking-wider relative z-10">Menunggu Laporan Survey dari Pekerja</p>
+                </div>
+                <div class="bg-white border border-gray-100 border-t-0 rounded-b-2xl shadow-sm p-6 text-center">
+                    <div class="w-16 h-16 bg-cyan-50 text-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-cyan-100">
+                        <i class="fas fa-map-marked-alt text-2xl"></i>
+                    </div>
+                    <h4 class="font-extrabold text-gray-800 text-sm mb-1">Pekerja Sedang di Lokasi</h4>
+                    <p class="text-xs text-gray-500 leading-relaxed mb-4">Pekerja UPTD <b>{{ $laporan->pekerja->nama_lengkap ?? 'Tim UPTD' }}</b> sedang melakukan survei lapangan. Laporan survei akan muncul setelah pekerja mengirimkannya melalui aplikasi mobile.</p>
+                    <div class="bg-cyan-50 border border-cyan-100 rounded-xl p-3 text-left">
+                        <p class="text-[10px] font-bold text-cyan-700 uppercase tracking-wider mb-1">Status Penugasan</p>
+                        <p class="text-xs font-semibold text-cyan-800">
+                            <i class="fas fa-circle text-cyan-500 mr-1 text-[8px] animate-pulse"></i>
+                            {{ $laporan->penugasan->status_tugas === 'ditugaskan' ? 'Pekerja Diberangkatkan ke Lokasi' : 'Survei Sedang Berlangsung' }}
+                        </p>
+                    </div>
+                </div>
+
             @elseif($laporan->status === 'menunggu_validasi' && $laporan->penugasan && $laporan->penugasan->status_tugas === 'survei_selesai')
                 {{-- VALIDASI SURVEY --}}
-                <div class="bg-yellow-600 rounded-t-2xl p-5 text-white shadow-md relative overflow-hidden">
+                <div class="bg-orange-500 rounded-t-2xl p-5 text-white shadow-md relative overflow-hidden">
                     <div class="absolute -right-4 -top-4 opacity-10"><i class="fas fa-clipboard-list text-8xl"></i></div>
                     <h3 class="text-sm font-bold flex items-center relative z-10"><i class="fas fa-search-location mr-2"></i> Hasil Survei Lapangan</h3>
-                    <p class="text-[10px] text-yellow-200 mt-1 uppercase tracking-wider relative z-10">Validasi Temuan UPTD</p>
+                    <p class="text-[10px] text-orange-100 mt-1 uppercase tracking-wider relative z-10">Validasi Temuan UPTD — Tindakan Diperlukan</p>
                 </div>
 
                 <div class="bg-white border border-gray-100 border-t-0 rounded-b-2xl shadow-sm p-6">
@@ -445,7 +487,7 @@
                             </button>
                         @else
                             <button type="button" disabled class="w-full bg-gray-100 text-gray-400 font-extrabold text-sm py-3.5 rounded-lg flex justify-center items-center mb-3 cursor-not-allowed border border-gray-200">
-                                Laporan Sedang Dikerjakan Pekerja <i class="fas fa-lock ml-2"></i>
+                                Laporan Sedang Dalam Proses <i class="fas fa-lock ml-2"></i>
                             </button>
                         @endif
                     </form>
@@ -462,7 +504,8 @@
                             </form>
                             <p class="text-[9px] text-center text-gray-400 mt-2">Gunakan jika laporan ini bukan wewenang bidang Anda.</p>
 
-                        @elseif($laporan->status == 'proses')
+                        @elseif(in_array($laporan->status, ['disurvei', 'proses', 'terkendala', 'revisi', 'ditunda']))
+                            {{-- Tombol batalkan penugasan tersedia untuk semua status aktif sebelum selesai --}}
                             <form id="form-batalkan-tugas" action="{{ route('admin_bidang.laporan.batal_tugas', $laporan->id) ?? '#' }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="alasan_pembatalan" id="alasan_pembatalan_tugas">
@@ -470,7 +513,7 @@
                                     <i class="fas fa-times-circle mr-2"></i> Batalkan Penugasan Pekerja
                                 </button>
                             </form>
-                            <p class="text-[9px] text-center text-gray-400 mt-2">Menarik kembali tugas dari Pekerja UPTD.</p>
+                            <p class="text-[9px] text-center text-gray-400 mt-2">Menarik kembali tugas dari Pekerja UPTD. Status akan kembali ke "Menunggu Penugasan".</p>
                         @endif
 
                     </div>

@@ -47,7 +47,7 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 animasi-masuk delay-1">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8 animasi-masuk delay-1">
         <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center space-x-4 hover:border-blue-200 transition cursor-pointer group">
             <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform"><i class="fas fa-file-invoice"></i></div>
             <div>
@@ -59,8 +59,16 @@
         <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center space-x-4 hover:border-yellow-200 transition cursor-pointer group">
             <div class="w-12 h-12 rounded-full bg-yellow-50 text-yellow-500 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform"><i class="fas fa-clipboard-list"></i></div>
             <div>
-                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Menunggu UPTD</p>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Menunggu Penugasan</p>
                 <h4 class="text-2xl font-extrabold text-gray-800 leading-none">{{ number_format($statistik['menunggu'] ?? 0, 0, ',', '.') }}</h4>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center space-x-4 hover:border-cyan-200 transition cursor-pointer group">
+            <div class="w-12 h-12 rounded-full bg-cyan-50 text-cyan-500 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform"><i class="fas fa-search-location"></i></div>
+            <div>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Survei / Validasi</p>
+                <h4 class="text-2xl font-extrabold text-gray-800 leading-none">{{ number_format($statistik['disurvei'] ?? 0, 0, ',', '.') }}</h4>
             </div>
         </div>
 
@@ -93,8 +101,13 @@
                     <select name="status" class="hidden">
                         <option value="semua" {{ request('status') == 'semua' ? 'selected' : '' }}>Semua Status</option>
                         <option value="diteruskan" {{ request('status') == 'diteruskan' ? 'selected' : '' }}>Menunggu Penugasan</option>
+                        <option value="disurvei" {{ request('status') == 'disurvei' ? 'selected' : '' }}>Sedang Disurvei</option>
+                        <option value="menunggu_validasi" {{ request('status') == 'menunggu_validasi' ? 'selected' : '' }}>Menunggu Validasi</option>
                         <option value="proses" {{ request('status') == 'proses' ? 'selected' : '' }}>Sedang Dikerjakan</option>
+                        <option value="terkendala" {{ request('status') == 'terkendala' ? 'selected' : '' }}>Terkendala</option>
+                        <option value="ditunda" {{ request('status') == 'ditunda' ? 'selected' : '' }}>Ditunda</option>
                         <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                        <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                     </select>
                     <div class="dropdown-btn flex items-center justify-between bg-white border border-gray-200 rounded-xl pl-4 pr-3 py-2 text-sm text-gray-600 font-bold cursor-pointer hover:border-pupr-blue hover:bg-blue-50 hover:text-pupr-blue transition shadow-sm w-full">
                         <span class="dropdown-text text-gray-700">Semua Status</span>
@@ -107,11 +120,26 @@
                         <li data-value="diteruskan" class="px-4 py-3 text-xs font-bold text-gray-600 hover:bg-blue-50 hover:text-pupr-blue cursor-pointer transition flex items-center justify-between border-t border-gray-50 {{ request('status') == 'diteruskan' ? 'bg-blue-50 text-pupr-blue' : '' }}">
                             Menunggu Penugasan {!! request('status') == 'diteruskan' ? '<i class="fas fa-check text-pupr-blue"></i>' : '' !!}
                         </li>
+                        <li data-value="disurvei" class="px-4 py-3 text-xs font-bold text-gray-600 hover:bg-blue-50 hover:text-pupr-blue cursor-pointer transition flex items-center justify-between border-t border-gray-50 {{ request('status') == 'disurvei' ? 'bg-blue-50 text-pupr-blue' : '' }}">
+                            Sedang Disurvei {!! request('status') == 'disurvei' ? '<i class="fas fa-check text-pupr-blue"></i>' : '' !!}
+                        </li>
+                        <li data-value="menunggu_validasi" class="px-4 py-3 text-xs font-bold text-gray-600 hover:bg-blue-50 hover:text-pupr-blue cursor-pointer transition flex items-center justify-between border-t border-gray-50 {{ request('status') == 'menunggu_validasi' ? 'bg-blue-50 text-pupr-blue' : '' }}">
+                            Menunggu Validasi {!! request('status') == 'menunggu_validasi' ? '<i class="fas fa-check text-pupr-blue"></i>' : '' !!}
+                        </li>
                         <li data-value="proses" class="px-4 py-3 text-xs font-bold text-gray-600 hover:bg-blue-50 hover:text-pupr-blue cursor-pointer transition flex items-center justify-between border-t border-gray-50 {{ request('status') == 'proses' ? 'bg-blue-50 text-pupr-blue' : '' }}">
                             Sedang Dikerjakan {!! request('status') == 'proses' ? '<i class="fas fa-check text-pupr-blue"></i>' : '' !!}
                         </li>
+                        <li data-value="terkendala" class="px-4 py-3 text-xs font-bold text-gray-600 hover:bg-blue-50 hover:text-pupr-blue cursor-pointer transition flex items-center justify-between border-t border-gray-50 {{ request('status') == 'terkendala' ? 'bg-blue-50 text-pupr-blue' : '' }}">
+                            Terkendala {!! request('status') == 'terkendala' ? '<i class="fas fa-check text-pupr-blue"></i>' : '' !!}
+                        </li>
+                        <li data-value="ditunda" class="px-4 py-3 text-xs font-bold text-gray-600 hover:bg-blue-50 hover:text-pupr-blue cursor-pointer transition flex items-center justify-between border-t border-gray-50 {{ request('status') == 'ditunda' ? 'bg-blue-50 text-pupr-blue' : '' }}">
+                            Ditunda {!! request('status') == 'ditunda' ? '<i class="fas fa-check text-pupr-blue"></i>' : '' !!}
+                        </li>
                         <li data-value="selesai" class="px-4 py-3 text-xs font-bold text-gray-600 hover:bg-blue-50 hover:text-pupr-blue cursor-pointer transition flex items-center justify-between border-t border-gray-50 {{ request('status') == 'selesai' ? 'bg-blue-50 text-pupr-blue' : '' }}">
                             Selesai {!! request('status') == 'selesai' ? '<i class="fas fa-check text-pupr-blue"></i>' : '' !!}
+                        </li>
+                        <li data-value="ditolak" class="px-4 py-3 text-xs font-bold text-gray-600 hover:bg-blue-50 hover:text-pupr-blue cursor-pointer transition flex items-center justify-between border-t border-gray-50 {{ request('status') == 'ditolak' ? 'bg-blue-50 text-pupr-blue' : '' }}">
+                            Ditolak {!! request('status') == 'ditolak' ? '<i class="fas fa-check text-pupr-blue"></i>' : '' !!}
                         </li>
                     </ul>
                 </div>
@@ -170,13 +198,41 @@
                                 <span class="flex items-center text-yellow-600 bg-yellow-50 px-2.5 py-1.5 rounded-full w-max text-[10px] font-bold border border-yellow-100">
                                     <span class="w-1.5 h-1.5 rounded-full bg-yellow-500 mr-1.5 animate-pulse"></span> Menunggu Penugasan
                                 </span>
+                            @elseif($item->status == 'disurvei')
+                                <span class="flex items-center text-cyan-600 bg-cyan-50 px-2.5 py-1.5 rounded-full w-max text-[10px] font-bold border border-cyan-100">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 mr-1.5 animate-pulse"></span> Sedang Disurvei
+                                </span>
+                            @elseif($item->status == 'menunggu_validasi')
+                                <span class="flex items-center text-orange-600 bg-orange-50 px-2.5 py-1.5 rounded-full w-max text-[10px] font-bold border border-orange-100">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5 animate-pulse"></span> Menunggu Validasi
+                                </span>
                             @elseif($item->status == 'proses')
                                 <span class="flex items-center text-indigo-600 bg-indigo-50 px-2.5 py-1.5 rounded-full w-max text-[10px] font-bold border border-indigo-100">
                                     <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 mr-1.5"></span> Dalam Pengerjaan
                                 </span>
-                            @else
+                            @elseif($item->status == 'terkendala')
+                                <span class="flex items-center text-red-600 bg-red-50 px-2.5 py-1.5 rounded-full w-max text-[10px] font-bold border border-red-100">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span> Terkendala
+                                </span>
+                            @elseif($item->status == 'revisi')
+                                <span class="flex items-center text-purple-600 bg-purple-50 px-2.5 py-1.5 rounded-full w-max text-[10px] font-bold border border-purple-100">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-500 mr-1.5"></span> Perlu Revisi
+                                </span>
+                            @elseif($item->status == 'ditunda')
+                                <span class="flex items-center text-gray-600 bg-gray-100 px-2.5 py-1.5 rounded-full w-max text-[10px] font-bold border border-gray-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-500 mr-1.5"></span> Ditunda
+                                </span>
+                            @elseif($item->status == 'selesai')
                                 <span class="flex items-center text-green-600 bg-green-50 px-2.5 py-1.5 rounded-full w-max text-[10px] font-bold border border-green-100">
                                     <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5"></span> Selesai
+                                </span>
+                            @elseif($item->status == 'ditolak')
+                                <span class="flex items-center text-red-700 bg-red-100 px-2.5 py-1.5 rounded-full w-max text-[10px] font-bold border border-red-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-700 mr-1.5"></span> Ditolak
+                                </span>
+                            @else
+                                <span class="flex items-center text-gray-500 bg-gray-50 px-2.5 py-1.5 rounded-full w-max text-[10px] font-bold border border-gray-100">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400 mr-1.5"></span> {{ ucfirst($item->status) }}
                                 </span>
                             @endif
                         </td>
@@ -184,6 +240,8 @@
                             <a href="{{ route('admin_bidang.laporan.detail', $item->id) }}" class="bg-blue-50 text-blue-600 hover:bg-pupr-blue hover:text-white px-4 py-2 rounded-lg text-xs font-bold transition flex items-center border border-blue-100 hover:border-pupr-blue hover:shadow-md">
                                 @if($item->status == 'diteruskan')
                                     <i class="fas fa-paper-plane mr-2"></i> Tugaskan
+                                @elseif(in_array($item->status, ['disurvei', 'menunggu_validasi']))
+                                    <i class="fas fa-search-location mr-2"></i> Cek Survei
                                 @else
                                     <i class="fas fa-info-circle mr-2"></i> Detail Laporan
                                 @endif

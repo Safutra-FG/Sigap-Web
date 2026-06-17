@@ -16,7 +16,7 @@ class PenggunaController extends Controller
         // Ambil semua pengguna beserta data bidangnya
         $pengguna = User::with('bidang')->orderBy('created_at', 'desc')->get();
         // Ambil data bidang yang aktif untuk form tambah pengguna
-        $bidang = Bidang::where('status', 'aktif')->get();
+        $bidang = Bidang::where('status_aktif', true)->get();
 
         return view('admin_universal.pengguna.index', compact('pengguna', 'bidang'));
     }
@@ -32,11 +32,17 @@ class PenggunaController extends Controller
             'password'       => 'required|string|min:6',
             'peran'          => 'required|in:admin_universal,admin_bidang,pekerja_bidang',
             'id_bidang'      => 'nullable',
-            'kantor_wilayah' => 'nullable|string', // PERBAIKAN 1: Format validasi diperbaiki
+            'kantor_wilayah' => 'nullable|string',
         ], [
-            'email.unique'   => 'Gagal: Alamat email ini sudah terdaftar pada akun lain!',
-            'username.unique'=> 'Gagal: Nama pengguna (username) ini sudah dipakai, cari yang lain!',
-            'password.min'   => 'Gagal: Kata sandi terlalu pendek. Wajib minimal 6 karakter demi keamanan.',
+            'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
+            'username.required' => 'Username wajib diisi.',
+            'username.unique'=> 'Nama pengguna (username) ini sudah dipakai, cari yang lain!',
+            'email.required' => 'Email wajib diisi.',
+            'email.unique'   => 'Alamat email ini sudah terdaftar pada akun lain!',
+            'password.required' => 'Kata sandi wajib diisi.',
+            'password.min'   => 'Kata sandi terlalu pendek. Wajib minimal 6 karakter demi keamanan.',
+            'peran.required' => 'Peran akun wajib dipilih.',
+            'peran.in'       => 'Peran akun tidak valid.',
         ]);
 
         // 2. Proses simpan ke database
@@ -46,8 +52,9 @@ class PenggunaController extends Controller
             'email'          => $request->email,
             'password'       => Hash::make($request->password),
             'peran'          => $request->peran,
-            'id_bidang'      => $request->id_bidang, // PERBAIKAN 2: Menyamakan nama dengan name="id_bidang" di HTML
-            'kantor_wilayah' => $request->kantor_wilayah, // PERBAIKAN 3: Baris ini ditambahkan agar wilayah tersimpan!
+            'id_bidang'      => $request->id_bidang,
+            'kantor_wilayah' => $request->kantor_wilayah,
+            'status_akun'    => 'aktif'
         ]);
 
         // Catat Log

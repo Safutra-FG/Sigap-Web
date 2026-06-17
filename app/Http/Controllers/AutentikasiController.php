@@ -25,13 +25,26 @@ class AutentikasiController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
+            // Cek status akun
+            if ($user->status_akun !== 'aktif') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()->with('error', 'Akun Anda dinonaktifkan atau belum aktif. Hubungi admin.');
+            }
+
             // Pengalihan berdasarkan Peran (Role) sesuai SRS
             if ($user->peran == 'admin_universal') {
-                return redirect()->route('admin_universal.beranda');
+                return redirect()->route('admin_universal.beranda')->with('sukses', 'Selamat datang, Admin Universal ' . $user->nama_lengkap . '!');
             } elseif ($user->peran == 'admin_bidang') {
-                return redirect()->route('admin_bidang.beranda');
+                return redirect()->route('admin_bidang.beranda')->with('sukses', 'Selamat datang, Admin Bidang ' . $user->nama_lengkap . '!');
             } elseif ($user->peran == 'pekerja_bidang') {
-                return redirect()->route('pekerja.beranda');
+                return redirect()->route('pekerja.beranda')->with('sukses', 'Selamat datang, Pekerja ' . $user->nama_lengkap . '!');
+            } elseif ($user->peran == 'masyarakat') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()->with('error', 'Akun masyarakat hanya dapat digunakan melalui aplikasi mobile (Sigap Mobile).');
             }
 
             return redirect()->intended('/');

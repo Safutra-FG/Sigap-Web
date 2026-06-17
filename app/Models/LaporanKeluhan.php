@@ -24,6 +24,9 @@ class LaporanKeluhan extends Model
         'id_bidang_tujuan',
         'catatan_disposisi',
         'alasan_penolakan',
+        'id_pekerja',
+        'prioritas',
+        'instruksi_tambahan',
     ];
 
     // Relasi ke User (Masyarakat yang melapor)
