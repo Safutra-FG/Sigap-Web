@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['https://sigap-web-production-8e80.up.railway.app'],
 
     'allowed_origins_patterns' => [],
 
